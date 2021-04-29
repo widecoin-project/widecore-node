@@ -59,8 +59,8 @@ We now will setup symlinks in `widecore-node` *(repeat this for any other module
 cd node_modules
 rm -rf widecore-lib
 ln -s ~/widecore-lib
-rm -rf bitcoind-rpc
-ln -s ~/bitcoind-rpc
+rm -rf widecoind-rpc
+ln -s ~/widecoind-rpc
 ```
 
 And if you're compiling or developing widecoin:
@@ -85,12 +85,12 @@ npm run test
 
 To run a specific unit test in watch mode:
 ```bash
-mocha -w -R spec test/services/bitcoind.unit.js
+mocha -w -R spec test/services/widecoind.unit.js
 ```
 
 To run a specific regtest:
 ```bash
-mocha -R spec regtest/bitcoind.js
+mocha -R spec regtest/widecoind.js
 ```
 
 ## Running a Development Node

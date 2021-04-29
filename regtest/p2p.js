@@ -15,7 +15,7 @@ var Transaction = bitcore.Transaction;
 var BN = bitcore.crypto.BN;
 var async = require('async');
 var rimraf = require('rimraf');
-var bitcoind;
+var widecoind;
 
 /* jshint unused: false */
 var should = chai.should();
@@ -49,7 +49,7 @@ describe('P2P Functionality', function() {
         throw err;
       }
 
-      bitcoind = require('../').services.Bitcoin({
+      widecoind = require('../').services.Bitcoin({
         spawn: {
           datadir: datadir,
           exec: path.resolve(__dirname, '../bin/widecoind')
@@ -59,13 +59,13 @@ describe('P2P Functionality', function() {
         }
       });
 
-      bitcoind.on('error', function(err) {
+      widecoind.on('error', function(err) {
         log.error('error="%s"', err.message);
       });
 
       log.info('Waiting for Bitcoin Core to initialize...');
 
-      bitcoind.start(function(err) {
+      widecoind.start(function(err) {
         if (err) {
           throw err;
         }
@@ -75,7 +75,7 @@ describe('P2P Functionality', function() {
           protocol: 'http',
           host: '127.0.0.1',
           port: 30331,
-          user: 'bitcoin',
+          user: 'widecoin',
           pass: 'local321',
           rejectUnauthorized: false
         });
@@ -163,8 +163,8 @@ describe('P2P Functionality', function() {
     this.timeout(20000);
     peer.on('disconnect', function() {
       log.info('Peer disconnected');
-      bitcoind.node.stopping = true;
-      bitcoind.stop(function(err, result) {
+      widecoind.node.stopping = true;
+      widecoind.stop(function(err, result) {
         done();
       });
     });
@@ -176,7 +176,7 @@ describe('P2P Functionality', function() {
 
     var usedTxs = {};
 
-    bitcoind.on('tx', function(buffer) {
+    widecoind.on('tx', function(buffer) {
       var txFromResult = new Transaction().fromBuffer(buffer);
       var tx = usedTxs[txFromResult.id];
       should.exist(tx);

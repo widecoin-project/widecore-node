@@ -18,13 +18,13 @@ var log = index.log;
 var errors = index.errors;
 
 var Transaction = bitcore.Transaction;
-var readFileSync = sinon.stub().returns(fs.readFileSync(path.resolve(__dirname, '../data/bitcoin.conf')));
-var BitcoinService = proxyquire('../../lib/services/bitcoind', {
+var readFileSync = sinon.stub().returns(fs.readFileSync(path.resolve(__dirname, '../data/widecoin.conf')));
+var BitcoinService = proxyquire('../../lib/services/widecoind', {
   fs: {
     readFileSync: readFileSync
   }
 });
-var defaultBitcoinConf = fs.readFileSync(path.resolve(__dirname, '../data/default.bitcoin.conf'), 'utf8');
+var defaultBitcoinConf = fs.readFileSync(path.resolve(__dirname, '../data/default.widecoin.conf'), 'utf8');
 
 describe('Bitcoin Service', function() {
   var txhex = '01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000';
@@ -41,41 +41,41 @@ describe('Bitcoin Service', function() {
 
   describe('@constructor', function() {
     it('will create an instance', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      should.exist(bitcoind);
+      var widecoind = new BitcoinService(baseConfig);
+      should.exist(widecoind);
     });
     it('will create an instance without `new`', function() {
-      var bitcoind = BitcoinService(baseConfig);
-      should.exist(bitcoind);
+      var widecoind = BitcoinService(baseConfig);
+      should.exist(widecoind);
     });
     it('will init caches', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      should.exist(bitcoind.utxosCache);
-      should.exist(bitcoind.txidsCache);
-      should.exist(bitcoind.balanceCache);
-      should.exist(bitcoind.summaryCache);
-      should.exist(bitcoind.transactionDetailedCache);
+      var widecoind = new BitcoinService(baseConfig);
+      should.exist(widecoind.utxosCache);
+      should.exist(widecoind.txidsCache);
+      should.exist(widecoind.balanceCache);
+      should.exist(widecoind.summaryCache);
+      should.exist(widecoind.transactionDetailedCache);
 
-      should.exist(bitcoind.transactionCache);
-      should.exist(bitcoind.rawTransactionCache);
-      should.exist(bitcoind.blockCache);
-      should.exist(bitcoind.rawBlockCache);
-      should.exist(bitcoind.blockHeaderCache);
-      should.exist(bitcoind.zmqKnownTransactions);
-      should.exist(bitcoind.zmqKnownBlocks);
-      should.exist(bitcoind.lastTip);
-      should.exist(bitcoind.lastTipTimeout);
+      should.exist(widecoind.transactionCache);
+      should.exist(widecoind.rawTransactionCache);
+      should.exist(widecoind.blockCache);
+      should.exist(widecoind.rawBlockCache);
+      should.exist(widecoind.blockHeaderCache);
+      should.exist(widecoind.zmqKnownTransactions);
+      should.exist(widecoind.zmqKnownBlocks);
+      should.exist(widecoind.lastTip);
+      should.exist(widecoind.lastTipTimeout);
     });
     it('will init clients', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.should.deep.equal([]);
-      bitcoind.nodesIndex.should.equal(0);
-      bitcoind.nodes.push({client: sinon.stub()});
-      should.exist(bitcoind.client);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.should.deep.equal([]);
+      widecoind.nodesIndex.should.equal(0);
+      widecoind.nodes.push({client: sinon.stub()});
+      should.exist(widecoind.client);
     });
     it('will set subscriptions', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.subscriptions.should.deep.equal({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.subscriptions.should.deep.equal({
         address: {},
         rawtransaction: [],
         hashblock: []
@@ -85,11 +85,11 @@ describe('Bitcoin Service', function() {
 
   describe('#_initDefaults', function() {
     it('will set transaction concurrency', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._initDefaults({transactionConcurrency: 10});
-      bitcoind.transactionConcurrency.should.equal(10);
-      bitcoind._initDefaults({});
-      bitcoind.transactionConcurrency.should.equal(5);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._initDefaults({transactionConcurrency: 10});
+      widecoind.transactionConcurrency.should.equal(10);
+      widecoind._initDefaults({});
+      widecoind.transactionConcurrency.should.equal(5);
     });
   });
 
@@ -101,8 +101,8 @@ describe('Bitcoin Service', function() {
 
   describe('#getAPIMethods', function() {
     it('will return spec', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      var methods = bitcoind.getAPIMethods();
+      var widecoind = new BitcoinService(baseConfig);
+      var methods = widecoind.getAPIMethods();
       should.exist(methods);
       methods.length.should.equal(21);
     });
@@ -110,44 +110,44 @@ describe('Bitcoin Service', function() {
 
   describe('#getPublishEvents', function() {
     it('will return spec', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      var events = bitcoind.getPublishEvents();
+      var widecoind = new BitcoinService(baseConfig);
+      var events = widecoind.getPublishEvents();
       should.exist(events);
       events.length.should.equal(3);
-      events[0].name.should.equal('bitcoind/rawtransaction');
-      events[0].scope.should.equal(bitcoind);
+      events[0].name.should.equal('widecoind/rawtransaction');
+      events[0].scope.should.equal(widecoind);
       events[0].subscribe.should.be.a('function');
       events[0].unsubscribe.should.be.a('function');
-      events[1].name.should.equal('bitcoind/hashblock');
-      events[1].scope.should.equal(bitcoind);
+      events[1].name.should.equal('widecoind/hashblock');
+      events[1].scope.should.equal(widecoind);
       events[1].subscribe.should.be.a('function');
       events[1].unsubscribe.should.be.a('function');
-      events[2].name.should.equal('bitcoind/addresstxid');
-      events[2].scope.should.equal(bitcoind);
+      events[2].name.should.equal('widecoind/addresstxid');
+      events[2].scope.should.equal(widecoind);
       events[2].subscribe.should.be.a('function');
       events[2].unsubscribe.should.be.a('function');
     });
     it('will call subscribe/unsubscribe with correct args', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.subscribe = sinon.stub();
-      bitcoind.unsubscribe = sinon.stub();
-      var events = bitcoind.getPublishEvents();
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.subscribe = sinon.stub();
+      widecoind.unsubscribe = sinon.stub();
+      var events = widecoind.getPublishEvents();
 
       events[0].subscribe('test');
-      bitcoind.subscribe.args[0][0].should.equal('rawtransaction');
-      bitcoind.subscribe.args[0][1].should.equal('test');
+      widecoind.subscribe.args[0][0].should.equal('rawtransaction');
+      widecoind.subscribe.args[0][1].should.equal('test');
 
       events[0].unsubscribe('test');
-      bitcoind.unsubscribe.args[0][0].should.equal('rawtransaction');
-      bitcoind.unsubscribe.args[0][1].should.equal('test');
+      widecoind.unsubscribe.args[0][0].should.equal('rawtransaction');
+      widecoind.unsubscribe.args[0][1].should.equal('test');
 
       events[1].subscribe('test');
-      bitcoind.subscribe.args[1][0].should.equal('hashblock');
-      bitcoind.subscribe.args[1][1].should.equal('test');
+      widecoind.subscribe.args[1][0].should.equal('hashblock');
+      widecoind.subscribe.args[1][1].should.equal('test');
 
       events[1].unsubscribe('test');
-      bitcoind.unsubscribe.args[1][0].should.equal('hashblock');
-      bitcoind.unsubscribe.args[1][1].should.equal('test');
+      widecoind.unsubscribe.args[1][0].should.equal('hashblock');
+      widecoind.unsubscribe.args[1][1].should.equal('test');
     });
   });
 
@@ -160,14 +160,14 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will push to subscriptions', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter = {};
-      bitcoind.subscribe('hashblock', emitter);
-      bitcoind.subscriptions.hashblock[0].should.equal(emitter);
+      widecoind.subscribe('hashblock', emitter);
+      widecoind.subscriptions.hashblock[0].should.equal(emitter);
 
       var emitter2 = {};
-      bitcoind.subscribe('rawtransaction', emitter2);
-      bitcoind.subscriptions.rawtransaction[0].should.equal(emitter2);
+      widecoind.subscribe('rawtransaction', emitter2);
+      widecoind.subscriptions.rawtransaction[0].should.equal(emitter2);
     });
   });
 
@@ -180,34 +180,34 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will remove item from subscriptions', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = {};
       var emitter2 = {};
       var emitter3 = {};
       var emitter4 = {};
       var emitter5 = {};
-      bitcoind.subscribe('hashblock', emitter1);
-      bitcoind.subscribe('hashblock', emitter2);
-      bitcoind.subscribe('hashblock', emitter3);
-      bitcoind.subscribe('hashblock', emitter4);
-      bitcoind.subscribe('hashblock', emitter5);
-      bitcoind.subscriptions.hashblock.length.should.equal(5);
+      widecoind.subscribe('hashblock', emitter1);
+      widecoind.subscribe('hashblock', emitter2);
+      widecoind.subscribe('hashblock', emitter3);
+      widecoind.subscribe('hashblock', emitter4);
+      widecoind.subscribe('hashblock', emitter5);
+      widecoind.subscriptions.hashblock.length.should.equal(5);
 
-      bitcoind.unsubscribe('hashblock', emitter3);
-      bitcoind.subscriptions.hashblock.length.should.equal(4);
-      bitcoind.subscriptions.hashblock[0].should.equal(emitter1);
-      bitcoind.subscriptions.hashblock[1].should.equal(emitter2);
-      bitcoind.subscriptions.hashblock[2].should.equal(emitter4);
-      bitcoind.subscriptions.hashblock[3].should.equal(emitter5);
+      widecoind.unsubscribe('hashblock', emitter3);
+      widecoind.subscriptions.hashblock.length.should.equal(4);
+      widecoind.subscriptions.hashblock[0].should.equal(emitter1);
+      widecoind.subscriptions.hashblock[1].should.equal(emitter2);
+      widecoind.subscriptions.hashblock[2].should.equal(emitter4);
+      widecoind.subscriptions.hashblock[3].should.equal(emitter5);
     });
     it('will not remove item an already unsubscribed item', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = {};
       var emitter3 = {};
-      bitcoind.subscriptions.hashblock= [emitter1];
-      bitcoind.unsubscribe('hashblock', emitter3);
-      bitcoind.subscriptions.hashblock.length.should.equal(1);
-      bitcoind.subscriptions.hashblock[0].should.equal(emitter1);
+      widecoind.subscriptions.hashblock= [emitter1];
+      widecoind.unsubscribe('hashblock', emitter3);
+      widecoind.subscriptions.hashblock.length.should.equal(1);
+      widecoind.subscriptions.hashblock[0].should.equal(emitter1);
     });
   });
 
@@ -220,33 +220,33 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will not an invalid address', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter = new EventEmitter();
-      bitcoind.subscribeAddress(emitter, ['invalidaddress']);
-      should.not.exist(bitcoind.subscriptions.address['invalidaddress']);
+      widecoind.subscribeAddress(emitter, ['invalidaddress']);
+      should.not.exist(widecoind.subscriptions.address['invalidaddress']);
     });
     it('will add a valid address', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter = new EventEmitter();
-      bitcoind.subscribeAddress(emitter, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      should.exist(bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscribeAddress(emitter, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      should.exist(widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
     });
     it('will handle multiple address subscribers', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscribeAddress(emitter2, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      should.exist(bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
+      widecoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscribeAddress(emitter2, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      should.exist(widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
     });
     it('will not add the same emitter twice', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
-      bitcoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      should.exist(bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
+      widecoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      should.exist(widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
     });
   });
 
@@ -259,61 +259,61 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('it will remove a subscription', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscribeAddress(emitter2, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      should.exist(bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
-      bitcoind.unsubscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
+      widecoind.subscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscribeAddress(emitter2, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      should.exist(widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
+      widecoind.unsubscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
     });
     it('will unsubscribe subscriptions for an emitter', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
-      bitcoind.unsubscribeAddress(emitter1);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
+      widecoind.unsubscribeAddress(emitter1);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
     });
     it('will NOT unsubscribe subscription with missing address', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
-      bitcoind.unsubscribeAddress(emitter1, ['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo']);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
+      widecoind.unsubscribeAddress(emitter1, ['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(2);
     });
     it('will NOT unsubscribe subscription with missing emitter', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter2];
-      bitcoind.unsubscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'][0].should.equal(emitter2);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter2];
+      widecoind.unsubscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'][0].should.equal(emitter2);
     });
     it('will remove empty addresses', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
-      bitcoind.unsubscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      bitcoind.unsubscribeAddress(emitter2, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
-      should.not.exist(bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
+      widecoind.unsubscribeAddress(emitter1, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      widecoind.unsubscribeAddress(emitter2, ['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
+      should.not.exist(widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br']);
     });
     it('will unsubscribe emitter for all addresses', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
-      bitcoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'] = [emitter1, emitter2];
-      sinon.spy(bitcoind, 'unsubscribeAddressAll');
-      bitcoind.unsubscribeAddress(emitter1);
-      bitcoind.unsubscribeAddressAll.callCount.should.equal(1);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
-      bitcoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'].length.should.equal(1);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
+      widecoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'] = [emitter1, emitter2];
+      sinon.spy(widecoind, 'unsubscribeAddressAll');
+      widecoind.unsubscribeAddress(emitter1);
+      widecoind.unsubscribeAddressAll.callCount.should.equal(1);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
+      widecoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'].length.should.equal(1);
     });
   });
 
@@ -326,25 +326,25 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will unsubscribe emitter for all addresses', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var emitter1 = new EventEmitter();
       var emitter2 = new EventEmitter();
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
-      bitcoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'] = [emitter1, emitter2];
-      bitcoind.subscriptions.address['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'] = [emitter2];
-      bitcoind.subscriptions.address['3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou'] = [emitter1];
-      bitcoind.unsubscribeAddress(emitter1);
-      bitcoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
-      bitcoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'].length.should.equal(1);
-      bitcoind.subscriptions.address['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'].length.should.equal(1);
-      should.not.exist(bitcoind.subscriptions.address['3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou']);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'] = [emitter1, emitter2];
+      widecoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'] = [emitter1, emitter2];
+      widecoind.subscriptions.address['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'] = [emitter2];
+      widecoind.subscriptions.address['3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou'] = [emitter1];
+      widecoind.unsubscribeAddress(emitter1);
+      widecoind.subscriptions.address['2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br'].length.should.equal(1);
+      widecoind.subscriptions.address['LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo'].length.should.equal(1);
+      widecoind.subscriptions.address['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'].length.should.equal(1);
+      should.not.exist(widecoind.subscriptions.address['3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou']);
     });
   });
 
   describe('#_getDefaultConfig', function() {
     it('will generate config file from defaults', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      var config = bitcoind._getDefaultConfig();
+      var widecoind = new BitcoinService(baseConfig);
+      var config = widecoind._getDefaultConfig();
       config.should.equal(defaultBitcoinConf);
     });
   });
@@ -357,8 +357,8 @@ describe('Bitcoin Service', function() {
     afterEach(function() {
       sandbox.restore();
     });
-    it('will parse a bitcoin.conf file', function() {
-      var TestBitcoin = proxyquire('../../lib/services/bitcoind', {
+    it('will parse a widecoin.conf file', function() {
+      var TestBitcoin = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync,
           existsSync: sinon.stub().returns(true),
@@ -368,12 +368,12 @@ describe('Bitcoin Service', function() {
           sync: sinon.stub()
         }
       });
-      var bitcoind = new TestBitcoin(baseConfig);
-      bitcoind.options.spawn.datadir = '/tmp/.bitcoin';
+      var widecoind = new TestBitcoin(baseConfig);
+      widecoind.options.spawn.datadir = '/tmp/.widecoin';
       var node = {};
-      bitcoind._loadSpawnConfiguration(node);
-      should.exist(bitcoind.spawn.config);
-      bitcoind.spawn.config.should.deep.equal({
+      widecoind._loadSpawnConfiguration(node);
+      should.exist(widecoind.spawn.config);
+      widecoind.spawn.config.should.deep.equal({
         addressindex: 1,
         checkblocks: 144,
         dbcache: 8192,
@@ -381,7 +381,7 @@ describe('Bitcoin Service', function() {
         port: 20000,
         rpcport: 50001,
         rpcallowip: '127.0.0.1',
-        rpcuser: 'bitcoin',
+        rpcuser: 'widecoin',
         rpcpassword: 'local321',
         server: 1,
         spentindex: 1,
@@ -394,7 +394,7 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will expand relative datadir to absolute path', function() {
-      var TestBitcoin = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoin = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync,
           existsSync: sinon.stub().returns(true),
@@ -414,32 +414,32 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new TestBitcoin(config);
-      bitcoind.options.spawn.datadir = './data';
+      var widecoind = new TestBitcoin(config);
+      widecoind.options.spawn.datadir = './data';
       var node = {};
-      bitcoind._loadSpawnConfiguration(node);
-      bitcoind.options.spawn.datadir.should.equal('/tmp/.bitcore/data');
+      widecoind._loadSpawnConfiguration(node);
+      widecoind.options.spawn.datadir.should.equal('/tmp/.bitcore/data');
     });
     it('should throw an exception if txindex isn\'t enabled in the configuration', function() {
-      var TestBitcoin = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoin = proxyquire('../../lib/services/widecoind', {
         fs: {
-          readFileSync: sinon.stub().returns(fs.readFileSync(__dirname + '/../data/badbitcoin.conf')),
+          readFileSync: sinon.stub().returns(fs.readFileSync(__dirname + '/../data/badwidecoin.conf')),
           existsSync: sinon.stub().returns(true),
         },
         mkdirp: {
           sync: sinon.stub()
         }
       });
-      var bitcoind = new TestBitcoin(baseConfig);
+      var widecoind = new TestBitcoin(baseConfig);
       (function() {
-        bitcoind._loadSpawnConfiguration({datadir: './test'});
+        widecoind._loadSpawnConfiguration({datadir: './test'});
       }).should.throw(bitcore.errors.InvalidState);
     });
     it('should NOT set https options if node https options are set', function() {
       var writeFileSync = function(path, config) {
         config.should.equal(defaultBitcoinConf);
       };
-      var TestBitcoin = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoin = proxyquire('../../lib/services/widecoind', {
         fs: {
           writeFileSync: writeFileSync,
           readFileSync: readFileSync,
@@ -465,10 +465,10 @@ describe('Bitcoin Service', function() {
           exec: 'testexec'
         }
       };
-      var bitcoind = new TestBitcoin(config);
-      bitcoind.options.spawn.datadir = '/tmp/.bitcoin';
+      var widecoind = new TestBitcoin(config);
+      widecoind.options.spawn.datadir = '/tmp/.widecoin';
       var node = {};
-      bitcoind._loadSpawnConfiguration(node);
+      widecoind._loadSpawnConfiguration(node);
     });
   });
 
@@ -480,8 +480,8 @@ describe('Bitcoin Service', function() {
     afterEach(function() {
       sandbox.restore();
     });
-    it('should warn the user if reindex is set to 1 in the bitcoin.conf file', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+    it('should warn the user if reindex is set to 1 in the widecoin.conf file', function() {
+      var widecoind = new BitcoinService(baseConfig);
       var config = {
         txindex: 1,
         addressindex: 1,
@@ -492,12 +492,12 @@ describe('Bitcoin Service', function() {
         reindex: 1
       };
       var node = {};
-      bitcoind._checkConfigIndexes(config, node);
+      widecoind._checkConfigIndexes(config, node);
       log.warn.callCount.should.equal(1);
       node._reindex.should.equal(true);
     });
     it('should warn if zmq port and hosts do not match', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var config = {
         txindex: 1,
         addressindex: 1,
@@ -509,113 +509,113 @@ describe('Bitcoin Service', function() {
       };
       var node = {};
       (function() {
-        bitcoind._checkConfigIndexes(config, node);
+        widecoind._checkConfigIndexes(config, node);
       }).should.throw('"zmqpubrawtx" and "zmqpubhashblock"');
     });
   });
 
   describe('#_resetCaches', function() {
     it('will reset LRU caches', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var keys = [];
       for (var i = 0; i < 10; i++) {
         keys.push(crypto.randomBytes(32));
-        bitcoind.transactionDetailedCache.set(keys[i], {});
-        bitcoind.utxosCache.set(keys[i], {});
-        bitcoind.txidsCache.set(keys[i], {});
-        bitcoind.balanceCache.set(keys[i], {});
-        bitcoind.summaryCache.set(keys[i], {});
+        widecoind.transactionDetailedCache.set(keys[i], {});
+        widecoind.utxosCache.set(keys[i], {});
+        widecoind.txidsCache.set(keys[i], {});
+        widecoind.balanceCache.set(keys[i], {});
+        widecoind.summaryCache.set(keys[i], {});
       }
-      bitcoind._resetCaches();
-      should.equal(bitcoind.transactionDetailedCache.get(keys[0]), undefined);
-      should.equal(bitcoind.utxosCache.get(keys[0]), undefined);
-      should.equal(bitcoind.txidsCache.get(keys[0]), undefined);
-      should.equal(bitcoind.balanceCache.get(keys[0]), undefined);
-      should.equal(bitcoind.summaryCache.get(keys[0]), undefined);
+      widecoind._resetCaches();
+      should.equal(widecoind.transactionDetailedCache.get(keys[0]), undefined);
+      should.equal(widecoind.utxosCache.get(keys[0]), undefined);
+      should.equal(widecoind.txidsCache.get(keys[0]), undefined);
+      should.equal(widecoind.balanceCache.get(keys[0]), undefined);
+      should.equal(widecoind.summaryCache.get(keys[0]), undefined);
     });
   });
 
   describe('#_tryAllClients', function() {
     it('will retry for each node client', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.tryAllInterval = 1;
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.tryAllInterval = 1;
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('test'))
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('test'))
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArg(0)
         }
       });
-      bitcoind._tryAllClients(function(client, next) {
+      widecoind._tryAllClients(function(client, next) {
         client.getInfo(next);
       }, function(err) {
         if (err) {
           return done(err);
         }
-        bitcoind.nodes[0].client.getInfo.callCount.should.equal(1);
-        bitcoind.nodes[1].client.getInfo.callCount.should.equal(1);
-        bitcoind.nodes[2].client.getInfo.callCount.should.equal(1);
+        widecoind.nodes[0].client.getInfo.callCount.should.equal(1);
+        widecoind.nodes[1].client.getInfo.callCount.should.equal(1);
+        widecoind.nodes[2].client.getInfo.callCount.should.equal(1);
         done();
       });
     });
     it('will start using the current node index (round-robin)', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.tryAllInterval = 1;
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.tryAllInterval = 1;
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('2'))
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('3'))
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('1'))
         }
       });
-      bitcoind.nodesIndex = 2;
-      bitcoind._tryAllClients(function(client, next) {
+      widecoind.nodesIndex = 2;
+      widecoind._tryAllClients(function(client, next) {
         client.getInfo(next);
       }, function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.equal('3');
-        bitcoind.nodes[0].client.getInfo.callCount.should.equal(1);
-        bitcoind.nodes[1].client.getInfo.callCount.should.equal(1);
-        bitcoind.nodes[2].client.getInfo.callCount.should.equal(1);
-        bitcoind.nodesIndex.should.equal(2);
+        widecoind.nodes[0].client.getInfo.callCount.should.equal(1);
+        widecoind.nodes[1].client.getInfo.callCount.should.equal(1);
+        widecoind.nodes[2].client.getInfo.callCount.should.equal(1);
+        widecoind.nodesIndex.should.equal(2);
         done();
       });
     });
     it('will get error if all clients fail', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.tryAllInterval = 1;
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.tryAllInterval = 1;
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('test'))
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('test'))
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: sinon.stub().callsArgWith(0, new Error('test'))
         }
       });
-      bitcoind._tryAllClients(function(client, next) {
+      widecoind._tryAllClients(function(client, next) {
         client.getInfo(next);
       }, function(err) {
         should.exist(err);
@@ -627,9 +627,9 @@ describe('Bitcoin Service', function() {
   });
 
   describe('#_wrapRPCError', function() {
-    it('will convert bitcoind-rpc error object into JavaScript error', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      var error = bitcoind._wrapRPCError({message: 'Test error', code: -1});
+    it('will convert widecoind-rpc error object into JavaScript error', function() {
+      var widecoind = new BitcoinService(baseConfig);
+      var error = widecoind._wrapRPCError({message: 'Test error', code: -1});
       error.should.be.an.instanceof(errors.RPCError);
       error.code.should.equal(-1);
       error.message.should.equal('Test error');
@@ -645,10 +645,10 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will set height and genesis buffer', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var genesisBuffer = new Buffer([]);
-      bitcoind.getRawBlock = sinon.stub().callsArgWith(1, null, genesisBuffer);
-      bitcoind.nodes.push({
+      widecoind.getRawBlock = sinon.stub().callsArgWith(1, null, genesisBuffer);
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: function(callback) {
             callback(null, {
@@ -671,45 +671,45 @@ describe('Bitcoin Service', function() {
           }
         }
       });
-      bitcoind._initChain(function() {
+      widecoind._initChain(function() {
         log.info.callCount.should.equal(1);
-        bitcoind.getRawBlock.callCount.should.equal(1);
-        bitcoind.getRawBlock.args[0][0].should.equal('genesishash');
-        bitcoind.height.should.equal(5000);
-        bitcoind.genesisBuffer.should.equal(genesisBuffer);
+        widecoind.getRawBlock.callCount.should.equal(1);
+        widecoind.getRawBlock.args[0][0].should.equal('genesishash');
+        widecoind.height.should.equal(5000);
+        widecoind.genesisBuffer.should.equal(genesisBuffer);
         done();
       });
     });
     it('it will handle error from getBestBlockHash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -1, message: 'error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: getBestBlockHash
         }
       });
-      bitcoind._initChain(function(err) {
+      widecoind._initChain(function(err) {
         err.should.be.instanceOf(Error);
         done();
       });
     });
     it('it will handle error from getBlock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {});
       var getBlock = sinon.stub().callsArgWith(1, {code: -1, message: 'error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: getBestBlockHash,
           getBlock: getBlock
         }
       });
-      bitcoind._initChain(function(err) {
+      widecoind._initChain(function(err) {
         err.should.be.instanceOf(Error);
         done();
       });
     });
     it('it will handle error from getBlockHash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {});
       var getBlock = sinon.stub().callsArgWith(1, null, {
         result: {
@@ -717,20 +717,20 @@ describe('Bitcoin Service', function() {
         }
       });
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: getBestBlockHash,
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._initChain(function(err) {
+      widecoind._initChain(function(err) {
         err.should.be.instanceOf(Error);
         done();
       });
     });
     it('it will handle error from getRawBlock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {});
       var getBlock = sinon.stub().callsArgWith(1, null, {
         result: {
@@ -738,15 +738,15 @@ describe('Bitcoin Service', function() {
         }
       });
       var getBlockHash = sinon.stub().callsArgWith(1, null, {});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: getBestBlockHash,
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getRawBlock = sinon.stub().callsArgWith(1, new Error('test'));
-      bitcoind._initChain(function(err) {
+      widecoind.getRawBlock = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind._initChain(function(err) {
         err.should.be.instanceOf(Error);
         done();
       });
@@ -768,8 +768,8 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind._getDefaultConf().rpcport.should.equal(9332);
+      var widecoind = new BitcoinService(config);
+      widecoind._getDefaultConf().rpcport.should.equal(9332);
     });
     it('will get default rpc port for testnet', function() {
       var config = {
@@ -781,8 +781,8 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind._getDefaultConf().rpcport.should.equal(19332);
+      var widecoind = new BitcoinService(config);
+      widecoind._getDefaultConf().rpcport.should.equal(19332);
     });
     it('will get default rpc port for regtest', function() {
       bitcore.Networks.enableRegtest();
@@ -795,8 +795,8 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind._getDefaultConf().rpcport.should.equal(19332);
+      var widecoind = new BitcoinService(config);
+      widecoind._getDefaultConf().rpcport.should.equal(19332);
     });
   });
 
@@ -815,8 +815,8 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      should.equal(bitcoind._getNetworkConfigPath(), undefined);
+      var widecoind = new BitcoinService(config);
+      should.equal(widecoind._getNetworkConfigPath(), undefined);
     });
     it('will get default rpc port for testnet', function() {
       var config = {
@@ -828,8 +828,8 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind._getNetworkConfigPath().should.equal('testnet3/bitcoin.conf');
+      var widecoind = new BitcoinService(config);
+      widecoind._getNetworkConfigPath().should.equal('testnet3/widecoin.conf');
     });
     it('will get default rpc port for regtest', function() {
       bitcore.Networks.enableRegtest();
@@ -842,8 +842,8 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind._getNetworkConfigPath().should.equal('regtest/bitcoin.conf');
+      var widecoind = new BitcoinService(config);
+      widecoind._getNetworkConfigPath().should.equal('regtest/widecoin.conf');
     });
   });
 
@@ -853,78 +853,78 @@ describe('Bitcoin Service', function() {
       baseConfig.node.network = bitcore.Networks.testnet;
     });
     it('return --testnet for testnet', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.node.network = bitcore.Networks.testnet;
-      bitcoind._getNetworkOption().should.equal('--testnet');
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.node.network = bitcore.Networks.testnet;
+      widecoind._getNetworkOption().should.equal('--testnet');
     });
     it('return --regtest for testnet', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.node.network = bitcore.Networks.testnet;
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.node.network = bitcore.Networks.testnet;
       bitcore.Networks.enableRegtest();
-      bitcoind._getNetworkOption().should.equal('--regtest');
+      widecoind._getNetworkOption().should.equal('--regtest');
     });
     it('return undefined for livenet', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.node.network = bitcore.Networks.livenet;
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.node.network = bitcore.Networks.livenet;
       bitcore.Networks.enableRegtest();
-      should.equal(bitcoind._getNetworkOption(), undefined);
+      should.equal(widecoind._getNetworkOption(), undefined);
     });
   });
 
   describe('#_zmqBlockHandler', function() {
     it('will emit block', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {};
       var message = new Buffer('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
-      bitcoind._rapidProtectedUpdateTip = sinon.stub();
-      bitcoind.on('block', function(block) {
+      widecoind._rapidProtectedUpdateTip = sinon.stub();
+      widecoind.on('block', function(block) {
         block.should.equal(message);
         done();
       });
-      bitcoind._zmqBlockHandler(node, message);
+      widecoind._zmqBlockHandler(node, message);
     });
     it('will not emit same block twice', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {};
       var message = new Buffer('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
-      bitcoind._rapidProtectedUpdateTip = sinon.stub();
-      bitcoind.on('block', function(block) {
+      widecoind._rapidProtectedUpdateTip = sinon.stub();
+      widecoind.on('block', function(block) {
         block.should.equal(message);
         done();
       });
-      bitcoind._zmqBlockHandler(node, message);
-      bitcoind._zmqBlockHandler(node, message);
+      widecoind._zmqBlockHandler(node, message);
+      widecoind._zmqBlockHandler(node, message);
     });
     it('will call function to update tip', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {};
       var message = new Buffer('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
-      bitcoind._rapidProtectedUpdateTip = sinon.stub();
-      bitcoind._zmqBlockHandler(node, message);
-      bitcoind._rapidProtectedUpdateTip.callCount.should.equal(1);
-      bitcoind._rapidProtectedUpdateTip.args[0][0].should.equal(node);
-      bitcoind._rapidProtectedUpdateTip.args[0][1].should.equal(message);
+      widecoind._rapidProtectedUpdateTip = sinon.stub();
+      widecoind._zmqBlockHandler(node, message);
+      widecoind._rapidProtectedUpdateTip.callCount.should.equal(1);
+      widecoind._rapidProtectedUpdateTip.args[0][0].should.equal(node);
+      widecoind._rapidProtectedUpdateTip.args[0][1].should.equal(message);
     });
     it('will emit to subscribers', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {};
       var message = new Buffer('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
-      bitcoind._rapidProtectedUpdateTip = sinon.stub();
+      widecoind._rapidProtectedUpdateTip = sinon.stub();
       var emitter = new EventEmitter();
-      bitcoind.subscriptions.hashblock.push(emitter);
-      emitter.on('bitcoind/hashblock', function(blockHash) {
+      widecoind.subscriptions.hashblock.push(emitter);
+      emitter.on('widecoind/hashblock', function(blockHash) {
         blockHash.should.equal(message.toString('hex'));
         done();
       });
-      bitcoind._zmqBlockHandler(node, message);
+      widecoind._zmqBlockHandler(node, message);
     });
   });
 
   describe('#_rapidProtectedUpdateTip', function() {
     it('will limit tip updates with rapid calls', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var callCount = 0;
-      bitcoind._updateTip = function() {
+      widecoind._updateTip = function() {
         callCount++;
         callCount.should.be.within(1, 2);
         if (callCount > 1) {
@@ -935,7 +935,7 @@ describe('Bitcoin Service', function() {
       var message = new Buffer('00000000002e08fc7ae9a9aa5380e95e2adcdc5752a4a66a7d3a22466bd4e6aa', 'hex');
       var count = 0;
       function repeat() {
-        bitcoind._rapidProtectedUpdateTip(node, message);
+        widecoind._rapidProtectedUpdateTip(node, message);
         count++;
         if (count < 50) {
           repeat();
@@ -956,9 +956,9 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('log and emit rpc error from get block', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub();
-      bitcoind.on('error', function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub();
+      widecoind.on('error', function(err) {
         err.code.should.equal(-1);
         err.message.should.equal('Test error');
         log.error.callCount.should.equal(1);
@@ -969,12 +969,12 @@ describe('Bitcoin Service', function() {
           getBlock: sinon.stub().callsArgWith(1, {message: 'Test error', code: -1})
         }
       };
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
     });
     it('emit synced if percentage is 100', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, null, 100);
-      bitcoind.on('synced', function() {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, null, 100);
+      widecoind.on('synced', function() {
         done();
       });
       var node = {
@@ -982,12 +982,12 @@ describe('Bitcoin Service', function() {
           getBlock: sinon.stub()
         }
       };
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
     });
     it('NOT emit synced if percentage is less than 100', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, null, 99);
-      bitcoind.on('synced', function() {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, null, 99);
+      widecoind.on('synced', function() {
         throw new Error('Synced called');
       });
       var node = {
@@ -995,14 +995,14 @@ describe('Bitcoin Service', function() {
           getBlock: sinon.stub()
         }
       };
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
       log.info.callCount.should.equal(1);
       done();
     });
     it('log and emit error from syncPercentage', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, new Error('test'));
-      bitcoind.on('error', function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, new Error('test'));
+      widecoind.on('error', function(err) {
         log.error.callCount.should.equal(1);
         err.message.should.equal('test');
         done();
@@ -1012,16 +1012,16 @@ describe('Bitcoin Service', function() {
           getBlock: sinon.stub()
         }
       };
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
     });
     it('reset caches and set height', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub();
-      bitcoind._resetCaches = sinon.stub();
-      bitcoind.on('tip', function(height) {
-        bitcoind._resetCaches.callCount.should.equal(1);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub();
+      widecoind._resetCaches = sinon.stub();
+      widecoind.on('tip', function(height) {
+        widecoind._resetCaches.callCount.should.equal(1);
         height.should.equal(10);
-        bitcoind.height.should.equal(10);
+        widecoind.height.should.equal(10);
         done();
       });
       var node = {
@@ -1033,13 +1033,13 @@ describe('Bitcoin Service', function() {
           })
         }
       };
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
     });
     it('will NOT update twice for the same hash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub();
-      bitcoind._resetCaches = sinon.stub();
-      bitcoind.on('tip', function() {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub();
+      widecoind._resetCaches = sinon.stub();
+      widecoind.on('tip', function() {
         done();
       });
       var node = {
@@ -1051,8 +1051,8 @@ describe('Bitcoin Service', function() {
           })
         }
       };
-      bitcoind._updateTip(node, message);
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
     });
     it('will not call syncPercentage if node is stopping', function(done) {
       var config = {
@@ -1064,10 +1064,10 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind.syncPercentage = sinon.stub();
-      bitcoind._resetCaches = sinon.stub();
-      bitcoind.node.stopping = true;
+      var widecoind = new BitcoinService(config);
+      widecoind.syncPercentage = sinon.stub();
+      widecoind._resetCaches = sinon.stub();
+      widecoind.node.stopping = true;
       var node = {
         client: {
           getBlock: sinon.stub().callsArgWith(1, null, {
@@ -1077,17 +1077,17 @@ describe('Bitcoin Service', function() {
           })
         }
       };
-      bitcoind.on('tip', function() {
-        bitcoind.syncPercentage.callCount.should.equal(0);
+      widecoind.on('tip', function() {
+        widecoind.syncPercentage.callCount.should.equal(0);
         done();
       });
-      bitcoind._updateTip(node, message);
+      widecoind._updateTip(node, message);
     });
   });
 
   describe('#_getAddressesFromTransaction', function() {
     it('will get results using bitcore.Transaction', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var wif = 'T872No3VhULcqFF6Sv1PSCRXZKVBPYWG2UtG4ECFK7nzaUUU8Kuj';
       var privkey = bitcore.PrivateKey.fromWIF(wif);
       var inputAddress = privkey.toAddress(bitcore.Networks.testnet);
@@ -1102,13 +1102,13 @@ describe('Bitcoin Service', function() {
       });
       tx.to(outputAddress, 5000000000);
       tx.sign(privkey);
-      var addresses = bitcoind._getAddressesFromTransaction(tx);
+      var addresses = widecoind._getAddressesFromTransaction(tx);
       addresses.length.should.equal(2);
       addresses[0].should.equal(inputAddress.toString());
       addresses[1].should.equal(outputAddress.toString());
     });
     it('will handle non-standard script types', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var tx = bitcore.Transaction();
       tx.addInput(bitcore.Transaction.Input({
         prevTxId: '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
@@ -1123,21 +1123,21 @@ describe('Bitcoin Service', function() {
         script: bitcore.Script('OP_TRUE'),
         satoshis: 5000000000
       }));
-      var addresses = bitcoind._getAddressesFromTransaction(tx);
+      var addresses = widecoind._getAddressesFromTransaction(tx);
       addresses.length.should.equal(0);
     });
     it('will handle unparsable script types or missing input script', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var tx = bitcore.Transaction();
       tx.addOutput(bitcore.Transaction.Output({
         script: new Buffer('4c', 'hex'),
         satoshis: 5000000000
       }));
-      var addresses = bitcoind._getAddressesFromTransaction(tx);
+      var addresses = widecoind._getAddressesFromTransaction(tx);
       addresses.length.should.equal(0);
     });
     it('will return unique values', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var tx = bitcore.Transaction();
       var address = bitcore.Address('2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br');
       tx.addOutput(bitcore.Transaction.Output({
@@ -1148,88 +1148,88 @@ describe('Bitcoin Service', function() {
         script: bitcore.Script(address),
         satoshis: 5000000000
       }));
-      var addresses = bitcoind._getAddressesFromTransaction(tx);
+      var addresses = widecoind._getAddressesFromTransaction(tx);
       addresses.length.should.equal(1);
     });
   });
 
   describe('#_notifyAddressTxidSubscribers', function() {
     it('will emit event if matching addresses', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind._getAddressesFromTransaction = sinon.stub().returns([address]);
+      widecoind._getAddressesFromTransaction = sinon.stub().returns([address]);
       var emitter = new EventEmitter();
-      bitcoind.subscriptions.address[address] = [emitter];
+      widecoind.subscriptions.address[address] = [emitter];
       var txid = '46f24e0c274fc07708b781963576c4c5d5625d926dbb0a17fa865dcd9fe58ea0';
       var transaction = {};
-      emitter.on('bitcoind/addresstxid', function(data) {
+      emitter.on('widecoind/addresstxid', function(data) {
         data.address.should.equal(address);
         data.txid.should.equal(txid);
         done();
       });
       sinon.spy(emitter, 'emit');
-      bitcoind._notifyAddressTxidSubscribers(txid, transaction);
+      widecoind._notifyAddressTxidSubscribers(txid, transaction);
       emitter.emit.callCount.should.equal(1);
     });
     it('will NOT emit event without matching addresses', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind._getAddressesFromTransaction = sinon.stub().returns([address]);
+      widecoind._getAddressesFromTransaction = sinon.stub().returns([address]);
       var emitter = new EventEmitter();
       var txid = '46f24e0c274fc07708b781963576c4c5d5625d926dbb0a17fa865dcd9fe58ea0';
       var transaction = {};
       emitter.emit = sinon.stub();
-      bitcoind._notifyAddressTxidSubscribers(txid, transaction);
+      widecoind._notifyAddressTxidSubscribers(txid, transaction);
       emitter.emit.callCount.should.equal(0);
     });
   });
 
   describe('#_zmqTransactionHandler', function() {
     it('will emit to subscribers', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var expectedBuffer = new Buffer(txhex, 'hex');
       var emitter = new EventEmitter();
-      bitcoind.subscriptions.rawtransaction.push(emitter);
-      emitter.on('bitcoind/rawtransaction', function(hex) {
+      widecoind.subscriptions.rawtransaction.push(emitter);
+      emitter.on('widecoind/rawtransaction', function(hex) {
         hex.should.be.a('string');
         hex.should.equal(expectedBuffer.toString('hex'));
         done();
       });
       var node = {};
-      bitcoind._zmqTransactionHandler(node, expectedBuffer);
+      widecoind._zmqTransactionHandler(node, expectedBuffer);
     });
     it('will NOT emit to subscribers more than once for the same tx', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var expectedBuffer = new Buffer(txhex, 'hex');
       var emitter = new EventEmitter();
-      bitcoind.subscriptions.rawtransaction.push(emitter);
-      emitter.on('bitcoind/rawtransaction', function() {
+      widecoind.subscriptions.rawtransaction.push(emitter);
+      emitter.on('widecoind/rawtransaction', function() {
         done();
       });
       var node = {};
-      bitcoind._zmqTransactionHandler(node, expectedBuffer);
-      bitcoind._zmqTransactionHandler(node, expectedBuffer);
+      widecoind._zmqTransactionHandler(node, expectedBuffer);
+      widecoind._zmqTransactionHandler(node, expectedBuffer);
     });
     it('will emit "tx" event', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var expectedBuffer = new Buffer(txhex, 'hex');
-      bitcoind.on('tx', function(buffer) {
+      widecoind.on('tx', function(buffer) {
         buffer.should.be.instanceof(Buffer);
         buffer.toString('hex').should.equal(expectedBuffer.toString('hex'));
         done();
       });
       var node = {};
-      bitcoind._zmqTransactionHandler(node, expectedBuffer);
+      widecoind._zmqTransactionHandler(node, expectedBuffer);
     });
     it('will NOT emit "tx" event more than once for the same tx', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var expectedBuffer = new Buffer(txhex, 'hex');
-      bitcoind.on('tx', function() {
+      widecoind.on('tx', function() {
         done();
       });
       var node = {};
-      bitcoind._zmqTransactionHandler(node, expectedBuffer);
-      bitcoind._zmqTransactionHandler(node, expectedBuffer);
+      widecoind._zmqTransactionHandler(node, expectedBuffer);
+      widecoind._zmqTransactionHandler(node, expectedBuffer);
     });
   });
 
@@ -1242,11 +1242,11 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('log errors, update tip and subscribe to zmq events', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._updateTip = sinon.stub();
-      bitcoind._subscribeZmqEvents = sinon.stub();
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._updateTip = sinon.stub();
+      widecoind._subscribeZmqEvents = sinon.stub();
       var blockEvents = 0;
-      bitcoind.on('block', function() {
+      widecoind.on('block', function() {
         blockEvents++;
       });
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
@@ -1277,12 +1277,12 @@ describe('Bitcoin Service', function() {
           getBlockchainInfo: getBlockchainInfo
         }
       };
-      bitcoind._checkSyncedAndSubscribeZmqEvents(node);
+      widecoind._checkSyncedAndSubscribeZmqEvents(node);
       setTimeout(function() {
         log.error.callCount.should.equal(2);
         blockEvents.should.equal(11);
-        bitcoind._updateTip.callCount.should.equal(11);
-        bitcoind._subscribeZmqEvents.callCount.should.equal(1);
+        widecoind._updateTip.callCount.should.equal(11);
+        widecoind._subscribeZmqEvents.callCount.should.equal(1);
         done();
       }, 200);
     });
@@ -1296,7 +1296,7 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
+      var widecoind = new BitcoinService(config);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -1, message: 'error'});
       var node = {
         _tipUpdateInterval: 1,
@@ -1304,9 +1304,9 @@ describe('Bitcoin Service', function() {
           getBestBlockHash: getBestBlockHash
         }
       };
-      bitcoind._checkSyncedAndSubscribeZmqEvents(node);
+      widecoind._checkSyncedAndSubscribeZmqEvents(node);
       setTimeout(function() {
-        bitcoind.node.stopping = true;
+        widecoind.node.stopping = true;
         var count = getBestBlockHash.callCount;
         setTimeout(function() {
           getBestBlockHash.callCount.should.equal(count);
@@ -1315,9 +1315,9 @@ describe('Bitcoin Service', function() {
       }, 100);
     });
     it('will not set interval if synced is true', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._updateTip = sinon.stub();
-      bitcoind._subscribeZmqEvents = sinon.stub();
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._updateTip = sinon.stub();
+      widecoind._subscribeZmqEvents = sinon.stub();
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: '00000000000000001bb82a7f5973618cfd3185ba1ded04dd852a653f92a27c45'
       });
@@ -1334,7 +1334,7 @@ describe('Bitcoin Service', function() {
           getBlockchainInfo: getBlockchainInfo
         }
       };
-      bitcoind._checkSyncedAndSubscribeZmqEvents(node);
+      widecoind._checkSyncedAndSubscribeZmqEvents(node);
       setTimeout(function() {
         getBestBlockHash.callCount.should.equal(1);
         getBlockchainInfo.callCount.should.equal(1);
@@ -1345,28 +1345,28 @@ describe('Bitcoin Service', function() {
 
   describe('#_subscribeZmqEvents', function() {
     it('will call subscribe on zmq socket', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {
         zmqSubSocket: {
           subscribe: sinon.stub(),
           on: sinon.stub()
         }
       };
-      bitcoind._subscribeZmqEvents(node);
+      widecoind._subscribeZmqEvents(node);
       node.zmqSubSocket.subscribe.callCount.should.equal(2);
       node.zmqSubSocket.subscribe.args[0][0].should.equal('hashblock');
       node.zmqSubSocket.subscribe.args[1][0].should.equal('rawtx');
     });
     it('will call relevant handler for rawtx topics', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._zmqTransactionHandler = sinon.stub();
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._zmqTransactionHandler = sinon.stub();
       var node = {
         zmqSubSocket: new EventEmitter()
       };
       node.zmqSubSocket.subscribe = sinon.stub();
-      bitcoind._subscribeZmqEvents(node);
+      widecoind._subscribeZmqEvents(node);
       node.zmqSubSocket.on('message', function() {
-        bitcoind._zmqTransactionHandler.callCount.should.equal(1);
+        widecoind._zmqTransactionHandler.callCount.should.equal(1);
         done();
       });
       var topic = new Buffer('rawtx', 'utf8');
@@ -1374,15 +1374,15 @@ describe('Bitcoin Service', function() {
       node.zmqSubSocket.emit('message', topic, message);
     });
     it('will call relevant handler for hashblock topics', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._zmqBlockHandler = sinon.stub();
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._zmqBlockHandler = sinon.stub();
       var node = {
         zmqSubSocket: new EventEmitter()
       };
       node.zmqSubSocket.subscribe = sinon.stub();
-      bitcoind._subscribeZmqEvents(node);
+      widecoind._subscribeZmqEvents(node);
       node.zmqSubSocket.on('message', function() {
-        bitcoind._zmqBlockHandler.callCount.should.equal(1);
+        widecoind._zmqBlockHandler.callCount.should.equal(1);
         done();
       });
       var topic = new Buffer('hashblock', 'utf8');
@@ -1390,17 +1390,17 @@ describe('Bitcoin Service', function() {
       node.zmqSubSocket.emit('message', topic, message);
     });
     it('will ignore unknown topic types', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._zmqBlockHandler = sinon.stub();
-      bitcoind._zmqTransactionHandler = sinon.stub();
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._zmqBlockHandler = sinon.stub();
+      widecoind._zmqTransactionHandler = sinon.stub();
       var node = {
         zmqSubSocket: new EventEmitter()
       };
       node.zmqSubSocket.subscribe = sinon.stub();
-      bitcoind._subscribeZmqEvents(node);
+      widecoind._subscribeZmqEvents(node);
       node.zmqSubSocket.on('message', function() {
-        bitcoind._zmqBlockHandler.callCount.should.equal(0);
-        bitcoind._zmqTransactionHandler.callCount.should.equal(0);
+        widecoind._zmqBlockHandler.callCount.should.equal(0);
+        widecoind._zmqTransactionHandler.callCount.should.equal(0);
         done();
       });
       var topic = new Buffer('unknown', 'utf8');
@@ -1417,14 +1417,14 @@ describe('Bitcoin Service', function() {
       var socketFunc = function() {
         return socket;
       };
-      var BitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var BitcoinService = proxyquire('../../lib/services/widecoind', {
         'zeromq': {
           socket: socketFunc
         }
       });
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {};
-      bitcoind._initZmqSubSocket(node, 'url');
+      widecoind._initZmqSubSocket(node, 'url');
       node.zmqSubSocket.should.equal(socket);
       socket.connect.callCount.should.equal(1);
       socket.connect.args[0][0].should.equal('url');
@@ -1443,7 +1443,7 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('give error from client getblockchaininfo', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {
         _reindex: true,
         _reindexWait: 1,
@@ -1451,14 +1451,14 @@ describe('Bitcoin Service', function() {
           getBlockchainInfo: sinon.stub().callsArgWith(0, {code: -1 , message: 'Test error'})
         }
       };
-      bitcoind._checkReindex(node, function(err) {
+      widecoind._checkReindex(node, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
         done();
       });
     });
     it('will wait until sync is 100 percent', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var percent = 0.89;
       var node = {
         _reindex: true,
@@ -1474,18 +1474,18 @@ describe('Bitcoin Service', function() {
           }
         }
       };
-      bitcoind._checkReindex(node, function() {
+      widecoind._checkReindex(node, function() {
         node._reindex.should.equal(false);
         log.info.callCount.should.equal(11);
         done();
       });
     });
     it('will call callback if reindex is not enabled', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {
         _reindex: false
       };
-      bitcoind._checkReindex(node, function() {
+      widecoind._checkReindex(node, function() {
         node._reindex.should.equal(false);
         done();
       });
@@ -1501,21 +1501,21 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will give rpc from client getbestblockhash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -1, message: 'Test error'});
       var node = {
         client: {
           getBestBlockHash: getBestBlockHash
         }
       };
-      bitcoind._loadTipFromNode(node, function(err) {
+      widecoind._loadTipFromNode(node, function(err) {
         err.should.be.instanceof(Error);
         log.warn.callCount.should.equal(0);
         done();
       });
     });
     it('will give rpc from client getblock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: '00000000000000001bb82a7f5973618cfd3185ba1ded04dd852a653f92a27c45'
       });
@@ -1526,7 +1526,7 @@ describe('Bitcoin Service', function() {
           getBlock: getBlock
         }
       };
-      bitcoind._loadTipFromNode(node, function(err) {
+      widecoind._loadTipFromNode(node, function(err) {
         getBlock.args[0][0].should.equal('00000000000000001bb82a7f5973618cfd3185ba1ded04dd852a653f92a27c45');
         err.should.be.instanceof(Error);
         log.warn.callCount.should.equal(0);
@@ -1534,21 +1534,21 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will log when error is RPC_IN_WARMUP', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {code: -28, message: 'Verifying blocks...'});
       var node = {
         client: {
           getBestBlockHash: getBestBlockHash
         }
       };
-      bitcoind._loadTipFromNode(node, function(err) {
+      widecoind._loadTipFromNode(node, function(err) {
         err.should.be.instanceof(Error);
         log.warn.callCount.should.equal(1);
         done();
       });
     });
     it('will set height and emit tip', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: '00000000000000001bb82a7f5973618cfd3185ba1ded04dd852a653f92a27c45'
       });
@@ -1563,12 +1563,12 @@ describe('Bitcoin Service', function() {
           getBlock: getBlock
         }
       };
-      bitcoind.on('tip', function(height) {
+      widecoind.on('tip', function(height) {
         height.should.equal(100);
-        bitcoind.height.should.equal(100);
+        widecoind.height.should.equal(100);
         done();
       });
-      bitcoind._loadTipFromNode(node, function(err) {
+      widecoind._loadTipFromNode(node, function(err) {
         if (err) {
           return done(err);
         }
@@ -1590,20 +1590,20 @@ describe('Bitcoin Service', function() {
       var error = new Error('Test error');
       error.code = 'ENOENT';
       readFile.onCall(1).callsArgWith(2, error);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFile: readFile
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind.spawnStopTime = 1;
-      bitcoind._process = {};
-      bitcoind._process.kill = sinon.stub();
-      bitcoind._stopSpawnedBitcoin(function(err) {
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind.spawnStopTime = 1;
+      widecoind._process = {};
+      widecoind._process.kill = sinon.stub();
+      widecoind._stopSpawnedBitcoin(function(err) {
         if (err) {
           return done(err);
         }
-        bitcoind._process.kill.callCount.should.equal(1);
+        widecoind._process.kill.callCount.should.equal(1);
         log.warn.callCount.should.equal(1);
         done();
       });
@@ -1614,22 +1614,22 @@ describe('Bitcoin Service', function() {
       var error = new Error('Test error');
       error.code = 'ENOENT';
       readFile.onCall(1).callsArgWith(2, error);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFile: readFile
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind.spawnStopTime = 1;
-      bitcoind._process = {};
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind.spawnStopTime = 1;
+      widecoind._process = {};
       var error2 = new Error('Test error');
       error2.code = 'ESRCH';
-      bitcoind._process.kill = sinon.stub().throws(error2);
-      bitcoind._stopSpawnedBitcoin(function(err) {
+      widecoind._process.kill = sinon.stub().throws(error2);
+      widecoind._stopSpawnedBitcoin(function(err) {
         if (err) {
           return done(err);
         }
-        bitcoind._process.kill.callCount.should.equal(1);
+        widecoind._process.kill.callCount.should.equal(1);
         log.warn.callCount.should.equal(2);
         done();
       });
@@ -1637,16 +1637,16 @@ describe('Bitcoin Service', function() {
     it('it will attempt to kill process with NaN', function(done) {
       var readFile = sandbox.stub();
       readFile.onCall(0).callsArgWith(2, null, '     ');
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFile: readFile
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind.spawnStopTime = 1;
-      bitcoind._process = {};
-      bitcoind._process.kill = sinon.stub();
-      bitcoind._stopSpawnedBitcoin(function(err) {
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind.spawnStopTime = 1;
+      widecoind._process = {};
+      widecoind._process.kill = sinon.stub();
+      widecoind._stopSpawnedBitcoin(function(err) {
         if (err) {
           return done(err);
         }
@@ -1656,16 +1656,16 @@ describe('Bitcoin Service', function() {
     it('it will attempt to kill process without pid', function(done) {
       var readFile = sandbox.stub();
       readFile.onCall(0).callsArgWith(2, null, '');
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFile: readFile
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind.spawnStopTime = 1;
-      bitcoind._process = {};
-      bitcoind._process.kill = sinon.stub();
-      bitcoind._stopSpawnedBitcoin(function(err) {
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind.spawnStopTime = 1;
+      widecoind._process = {};
+      widecoind._process.kill = sinon.stub();
+      widecoind._stopSpawnedBitcoin(function(err) {
         if (err) {
           return done(err);
         }
@@ -1685,20 +1685,20 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will give error from spawn config', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind._loadSpawnConfiguration = sinon.stub().throws(new Error('test'));
-      bitcoind._spawnChildProcess(function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind._loadSpawnConfiguration = sinon.stub().throws(new Error('test'));
+      widecoind._spawnChildProcess(function(err) {
         err.should.be.instanceof(Error);
         err.message.should.equal('test');
         done();
       });
     });
     it('will give error from stopSpawnedBitcoin', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind._stopSpawnedBitcoin = sinon.stub().callsArgWith(0, new Error('test'));
-      bitcoind._spawnChildProcess(function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind._stopSpawnedBitcoin = sinon.stub().callsArgWith(0, new Error('test'));
+      widecoind._spawnChildProcess(function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.equal('test');
       });
@@ -1715,7 +1715,7 @@ describe('Bitcoin Service', function() {
       };
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1723,12 +1723,12 @@ describe('Bitcoin Service', function() {
           spawn: spawn
         }
       });
-      var bitcoind = new TestBitcoinService(config);
-      bitcoind.spawn = {};
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind._stopSpawnedBitcoin = sinon.stub().callsArgWith(0, null);
-      bitcoind.node.stopping = true;
-      bitcoind._spawnChildProcess(function(err) {
+      var widecoind = new TestBitcoinService(config);
+      widecoind.spawn = {};
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind._stopSpawnedBitcoin = sinon.stub().callsArgWith(0, null);
+      widecoind.node.stopping = true;
+      widecoind._spawnChildProcess(function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.match(/Stopping while trying to spawn/);
       });
@@ -1736,7 +1736,7 @@ describe('Bitcoin Service', function() {
     it('will include network with spawn command and init zmq/rpc on node', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1744,50 +1744,50 @@ describe('Bitcoin Service', function() {
           spawn: spawn
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
+      var widecoind = new TestBitcoinService(baseConfig);
 
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind.spawn = {};
-      bitcoind.spawn.exec = 'testexec';
-      bitcoind.spawn.configPath = 'testdir/bitcoin.conf';
-      bitcoind.spawn.datadir = 'testdir';
-      bitcoind.spawn.config = {};
-      bitcoind.spawn.config.rpcport = 20001;
-      bitcoind.spawn.config.rpcuser = 'bitcoin';
-      bitcoind.spawn.config.rpcpassword = 'password';
-      bitcoind.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind.spawn = {};
+      widecoind.spawn.exec = 'testexec';
+      widecoind.spawn.configPath = 'testdir/widecoin.conf';
+      widecoind.spawn.datadir = 'testdir';
+      widecoind.spawn.config = {};
+      widecoind.spawn.config.rpcport = 20001;
+      widecoind.spawn.config.rpcuser = 'widecoin';
+      widecoind.spawn.config.rpcpassword = 'password';
+      widecoind.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
 
-      bitcoind._loadTipFromNode = sinon.stub().callsArgWith(1, null);
-      bitcoind._initZmqSubSocket = sinon.stub();
-      bitcoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      bitcoind._checkReindex = sinon.stub().callsArgWith(1, null);
-      bitcoind._spawnChildProcess(function(err, node) {
+      widecoind._loadTipFromNode = sinon.stub().callsArgWith(1, null);
+      widecoind._initZmqSubSocket = sinon.stub();
+      widecoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
+      widecoind._checkReindex = sinon.stub().callsArgWith(1, null);
+      widecoind._spawnChildProcess(function(err, node) {
         should.not.exist(err);
         spawn.callCount.should.equal(1);
         spawn.args[0][0].should.equal('testexec');
         spawn.args[0][1].should.deep.equal([
-          '--conf=testdir/bitcoin.conf',
+          '--conf=testdir/widecoin.conf',
           '--datadir=testdir',
           '--testnet'
         ]);
         spawn.args[0][2].should.deep.equal({
           stdio: 'inherit'
         });
-        bitcoind._loadTipFromNode.callCount.should.equal(1);
-        bitcoind._initZmqSubSocket.callCount.should.equal(1);
-        should.exist(bitcoind._initZmqSubSocket.args[0][0].client);
-        bitcoind._initZmqSubSocket.args[0][1].should.equal('tcp://127.0.0.1:30001');
-        bitcoind._checkSyncedAndSubscribeZmqEvents.callCount.should.equal(1);
-        should.exist(bitcoind._checkSyncedAndSubscribeZmqEvents.args[0][0].client);
+        widecoind._loadTipFromNode.callCount.should.equal(1);
+        widecoind._initZmqSubSocket.callCount.should.equal(1);
+        should.exist(widecoind._initZmqSubSocket.args[0][0].client);
+        widecoind._initZmqSubSocket.args[0][1].should.equal('tcp://127.0.0.1:30001');
+        widecoind._checkSyncedAndSubscribeZmqEvents.callCount.should.equal(1);
+        should.exist(widecoind._checkSyncedAndSubscribeZmqEvents.args[0][0].client);
         should.exist(node);
         should.exist(node.client);
         done();
       });
     });
-    it('will respawn bitcoind spawned process', function(done) {
+    it('will respawn widecoind spawned process', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1795,27 +1795,27 @@ describe('Bitcoin Service', function() {
           spawn: spawn
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind.spawn = {};
-      bitcoind.spawn.exec = 'bitcoind';
-      bitcoind.spawn.datadir = '/tmp/bitcoin';
-      bitcoind.spawn.configPath = '/tmp/bitcoin/bitcoin.conf';
-      bitcoind.spawn.config = {};
-      bitcoind.spawnRestartTime = 1;
-      bitcoind._loadTipFromNode = sinon.stub().callsArg(1);
-      bitcoind._initZmqSubSocket = sinon.stub();
-      bitcoind._checkReindex = sinon.stub().callsArg(1);
-      bitcoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      bitcoind._stopSpawnedBitcoin = sinon.stub().callsArg(0);
-      sinon.spy(bitcoind, '_spawnChildProcess');
-      bitcoind._spawnChildProcess(function(err) {
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind.spawn = {};
+      widecoind.spawn.exec = 'widecoind';
+      widecoind.spawn.datadir = '/tmp/widecoin';
+      widecoind.spawn.configPath = '/tmp/widecoin/widecoin.conf';
+      widecoind.spawn.config = {};
+      widecoind.spawnRestartTime = 1;
+      widecoind._loadTipFromNode = sinon.stub().callsArg(1);
+      widecoind._initZmqSubSocket = sinon.stub();
+      widecoind._checkReindex = sinon.stub().callsArg(1);
+      widecoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
+      widecoind._stopSpawnedBitcoin = sinon.stub().callsArg(0);
+      sinon.spy(widecoind, '_spawnChildProcess');
+      widecoind._spawnChildProcess(function(err) {
         if (err) {
           return done(err);
         }
         process.once('exit', function() {
           setTimeout(function() {
-            bitcoind._spawnChildProcess.callCount.should.equal(2);
+            widecoind._spawnChildProcess.callCount.should.equal(2);
             done();
           }, 5);
         });
@@ -1825,7 +1825,7 @@ describe('Bitcoin Service', function() {
     it('will emit error during respawn', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1833,26 +1833,26 @@ describe('Bitcoin Service', function() {
           spawn: spawn
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind.spawn = {};
-      bitcoind.spawn.exec = 'bitcoind';
-      bitcoind.spawn.datadir = '/tmp/bitcoin';
-      bitcoind.spawn.configPath = '/tmp/bitcoin/bitcoin.conf';
-      bitcoind.spawn.config = {};
-      bitcoind.spawnRestartTime = 1;
-      bitcoind._loadTipFromNode = sinon.stub().callsArg(1);
-      bitcoind._initZmqSubSocket = sinon.stub();
-      bitcoind._checkReindex = sinon.stub().callsArg(1);
-      bitcoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      bitcoind._stopSpawnedBitcoin = sinon.stub().callsArg(0);
-      sinon.spy(bitcoind, '_spawnChildProcess');
-      bitcoind._spawnChildProcess(function(err) {
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind.spawn = {};
+      widecoind.spawn.exec = 'widecoind';
+      widecoind.spawn.datadir = '/tmp/widecoin';
+      widecoind.spawn.configPath = '/tmp/widecoin/widecoin.conf';
+      widecoind.spawn.config = {};
+      widecoind.spawnRestartTime = 1;
+      widecoind._loadTipFromNode = sinon.stub().callsArg(1);
+      widecoind._initZmqSubSocket = sinon.stub();
+      widecoind._checkReindex = sinon.stub().callsArg(1);
+      widecoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
+      widecoind._stopSpawnedBitcoin = sinon.stub().callsArg(0);
+      sinon.spy(widecoind, '_spawnChildProcess');
+      widecoind._spawnChildProcess(function(err) {
         if (err) {
           return done(err);
         }
-        bitcoind._spawnChildProcess = sinon.stub().callsArgWith(0, new Error('test'));
-        bitcoind.on('error', function(err) {
+        widecoind._spawnChildProcess = sinon.stub().callsArgWith(0, new Error('test'));
+        widecoind.on('error', function(err) {
           err.should.be.instanceOf(Error);
           err.message.should.equal('test');
           done();
@@ -1860,10 +1860,10 @@ describe('Bitcoin Service', function() {
         process.emit('exit', 1);
       });
     });
-    it('will NOT respawn bitcoind spawned process if shutting down', function(done) {
+    it('will NOT respawn widecoind spawned process if shutting down', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1880,28 +1880,28 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new TestBitcoinService(config);
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind.spawn = {};
-      bitcoind.spawn.exec = 'bitcoind';
-      bitcoind.spawn.datadir = '/tmp/bitcoin';
-      bitcoind.spawn.configPath = '/tmp/bitcoin/bitcoin.conf';
-      bitcoind.spawn.config = {};
-      bitcoind.spawnRestartTime = 1;
-      bitcoind._loadTipFromNode = sinon.stub().callsArg(1);
-      bitcoind._initZmqSubSocket = sinon.stub();
-      bitcoind._checkReindex = sinon.stub().callsArg(1);
-      bitcoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      bitcoind._stopSpawnedBitcoin = sinon.stub().callsArg(0);
-      sinon.spy(bitcoind, '_spawnChildProcess');
-      bitcoind._spawnChildProcess(function(err) {
+      var widecoind = new TestBitcoinService(config);
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind.spawn = {};
+      widecoind.spawn.exec = 'widecoind';
+      widecoind.spawn.datadir = '/tmp/widecoin';
+      widecoind.spawn.configPath = '/tmp/widecoin/widecoin.conf';
+      widecoind.spawn.config = {};
+      widecoind.spawnRestartTime = 1;
+      widecoind._loadTipFromNode = sinon.stub().callsArg(1);
+      widecoind._initZmqSubSocket = sinon.stub();
+      widecoind._checkReindex = sinon.stub().callsArg(1);
+      widecoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
+      widecoind._stopSpawnedBitcoin = sinon.stub().callsArg(0);
+      sinon.spy(widecoind, '_spawnChildProcess');
+      widecoind._spawnChildProcess(function(err) {
         if (err) {
           return done(err);
         }
-        bitcoind.node.stopping = true;
+        widecoind.node.stopping = true;
         process.once('exit', function() {
           setTimeout(function() {
-            bitcoind._spawnChildProcess.callCount.should.equal(1);
+            widecoind._spawnChildProcess.callCount.should.equal(1);
             done();
           }, 5);
         });
@@ -1911,7 +1911,7 @@ describe('Bitcoin Service', function() {
     it('will give error after 60 retries', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1919,21 +1919,21 @@ describe('Bitcoin Service', function() {
           spawn: spawn
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
-      bitcoind.startRetryInterval = 1;
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind.spawn = {};
-      bitcoind.spawn.exec = 'testexec';
-      bitcoind.spawn.configPath = 'testdir/bitcoin.conf';
-      bitcoind.spawn.datadir = 'testdir';
-      bitcoind.spawn.config = {};
-      bitcoind.spawn.config.rpcport = 20001;
-      bitcoind.spawn.config.rpcuser = 'bitcoin';
-      bitcoind.spawn.config.rpcpassword = 'password';
-      bitcoind.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
-      bitcoind._loadTipFromNode = sinon.stub().callsArgWith(1, new Error('test'));
-      bitcoind._spawnChildProcess(function(err) {
-        bitcoind._loadTipFromNode.callCount.should.equal(60);
+      var widecoind = new TestBitcoinService(baseConfig);
+      widecoind.startRetryInterval = 1;
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind.spawn = {};
+      widecoind.spawn.exec = 'testexec';
+      widecoind.spawn.configPath = 'testdir/widecoin.conf';
+      widecoind.spawn.datadir = 'testdir';
+      widecoind.spawn.config = {};
+      widecoind.spawn.config.rpcport = 20001;
+      widecoind.spawn.config.rpcuser = 'widecoin';
+      widecoind.spawn.config.rpcpassword = 'password';
+      widecoind.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
+      widecoind._loadTipFromNode = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind._spawnChildProcess(function(err) {
+        widecoind._loadTipFromNode.callCount.should.equal(60);
         err.should.be.instanceof(Error);
         done();
       });
@@ -1941,7 +1941,7 @@ describe('Bitcoin Service', function() {
     it('will give error from check reindex', function(done) {
       var process = new EventEmitter();
       var spawn = sinon.stub().returns(process);
-      var TestBitcoinService = proxyquire('../../lib/services/bitcoind', {
+      var TestBitcoinService = proxyquire('../../lib/services/widecoind', {
         fs: {
           readFileSync: readFileSync
         },
@@ -1949,25 +1949,25 @@ describe('Bitcoin Service', function() {
           spawn: spawn
         }
       });
-      var bitcoind = new TestBitcoinService(baseConfig);
+      var widecoind = new TestBitcoinService(baseConfig);
 
-      bitcoind._loadSpawnConfiguration = sinon.stub();
-      bitcoind.spawn = {};
-      bitcoind.spawn.exec = 'testexec';
-      bitcoind.spawn.configPath = 'testdir/bitcoin.conf';
-      bitcoind.spawn.datadir = 'testdir';
-      bitcoind.spawn.config = {};
-      bitcoind.spawn.config.rpcport = 20001;
-      bitcoind.spawn.config.rpcuser = 'bitcoin';
-      bitcoind.spawn.config.rpcpassword = 'password';
-      bitcoind.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
+      widecoind._loadSpawnConfiguration = sinon.stub();
+      widecoind.spawn = {};
+      widecoind.spawn.exec = 'testexec';
+      widecoind.spawn.configPath = 'testdir/widecoin.conf';
+      widecoind.spawn.datadir = 'testdir';
+      widecoind.spawn.config = {};
+      widecoind.spawn.config.rpcport = 20001;
+      widecoind.spawn.config.rpcuser = 'widecoin';
+      widecoind.spawn.config.rpcpassword = 'password';
+      widecoind.spawn.config.zmqpubrawtx = 'tcp://127.0.0.1:30001';
 
-      bitcoind._loadTipFromNode = sinon.stub().callsArgWith(1, null);
-      bitcoind._initZmqSubSocket = sinon.stub();
-      bitcoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
-      bitcoind._checkReindex = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind._loadTipFromNode = sinon.stub().callsArgWith(1, null);
+      widecoind._initZmqSubSocket = sinon.stub();
+      widecoind._checkSyncedAndSubscribeZmqEvents = sinon.stub();
+      widecoind._checkReindex = sinon.stub().callsArgWith(1, new Error('test'));
 
-      bitcoind._spawnChildProcess(function(err) {
+      widecoind._spawnChildProcess(function(err) {
         err.should.be.instanceof(Error);
         done();
       });
@@ -1985,39 +1985,39 @@ describe('Bitcoin Service', function() {
           exec: 'testpath'
         }
       };
-      var bitcoind = new BitcoinService(config);
-      bitcoind.node.stopping = true;
-      bitcoind.startRetryInterval = 100;
-      bitcoind._loadTipFromNode = sinon.stub();
-      bitcoind._connectProcess({}, function(err) {
+      var widecoind = new BitcoinService(config);
+      widecoind.node.stopping = true;
+      widecoind.startRetryInterval = 100;
+      widecoind._loadTipFromNode = sinon.stub();
+      widecoind._connectProcess({}, function(err) {
         err.should.be.instanceof(Error);
         err.message.should.match(/Stopping while trying to connect/);
-        bitcoind._loadTipFromNode.callCount.should.equal(0);
+        widecoind._loadTipFromNode.callCount.should.equal(0);
         done();
       });
     });
     it('will give error from loadTipFromNode after 60 retries', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._loadTipFromNode = sinon.stub().callsArgWith(1, new Error('test'));
-      bitcoind.startRetryInterval = 1;
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._loadTipFromNode = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind.startRetryInterval = 1;
       var config = {};
-      bitcoind._connectProcess(config, function(err) {
+      widecoind._connectProcess(config, function(err) {
         err.should.be.instanceof(Error);
-        bitcoind._loadTipFromNode.callCount.should.equal(60);
+        widecoind._loadTipFromNode.callCount.should.equal(60);
         done();
       });
     });
     it('will init zmq/rpc on node', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._initZmqSubSocket = sinon.stub();
-      bitcoind._subscribeZmqEvents = sinon.stub();
-      bitcoind._loadTipFromNode = sinon.stub().callsArgWith(1, null);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._initZmqSubSocket = sinon.stub();
+      widecoind._subscribeZmqEvents = sinon.stub();
+      widecoind._loadTipFromNode = sinon.stub().callsArgWith(1, null);
       var config = {};
-      bitcoind._connectProcess(config, function(err, node) {
+      widecoind._connectProcess(config, function(err, node) {
         should.not.exist(err);
-        bitcoind._loadTipFromNode.callCount.should.equal(1);
-        bitcoind._initZmqSubSocket.callCount.should.equal(1);
-        bitcoind._loadTipFromNode.callCount.should.equal(1);
+        widecoind._loadTipFromNode.callCount.should.equal(1);
+        widecoind._initZmqSubSocket.callCount.should.equal(1);
+        widecoind._loadTipFromNode.callCount.should.equal(1);
         should.exist(node);
         should.exist(node.client);
         done();
@@ -2034,69 +2034,69 @@ describe('Bitcoin Service', function() {
       sandbox.restore();
     });
     it('will give error if "spawn" and "connect" are both not configured', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.options = {};
-      bitcoind.start(function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.options = {};
+      widecoind.start(function(err) {
         err.should.be.instanceof(Error);
         err.message.should.match(/Bitcoin configuration options/);
       });
       done();
     });
     it('will give error from spawnChildProcess', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._spawnChildProcess = sinon.stub().callsArgWith(0, new Error('test'));
-      bitcoind.options = {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._spawnChildProcess = sinon.stub().callsArgWith(0, new Error('test'));
+      widecoind.options = {
         spawn: {}
       };
-      bitcoind.start(function(err) {
+      widecoind.start(function(err) {
         err.should.be.instanceof(Error);
         err.message.should.equal('test');
         done();
       });
     });
     it('will give error from connectProcess', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._connectProcess = sinon.stub().callsArgWith(1, new Error('test'));
-      bitcoind.options = {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._connectProcess = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind.options = {
         connect: [
           {}
         ]
       };
-      bitcoind.start(function(err) {
-        bitcoind._connectProcess.callCount.should.equal(1);
+      widecoind.start(function(err) {
+        widecoind._connectProcess.callCount.should.equal(1);
         err.should.be.instanceof(Error);
         err.message.should.equal('test');
         done();
       });
     });
     it('will push node from spawnChildProcess', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var node = {};
-      bitcoind._initChain = sinon.stub().callsArg(0);
-      bitcoind._spawnChildProcess = sinon.stub().callsArgWith(0, null, node);
-      bitcoind.options = {
+      widecoind._initChain = sinon.stub().callsArg(0);
+      widecoind._spawnChildProcess = sinon.stub().callsArgWith(0, null, node);
+      widecoind.options = {
         spawn: {}
       };
-      bitcoind.start(function(err) {
+      widecoind.start(function(err) {
         should.not.exist(err);
-        bitcoind.nodes.length.should.equal(1);
+        widecoind.nodes.length.should.equal(1);
         done();
       });
     });
     it('will push node from connectProcess', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._initChain = sinon.stub().callsArg(0);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._initChain = sinon.stub().callsArg(0);
       var nodes = [{}];
-      bitcoind._connectProcess = sinon.stub().callsArgWith(1, null, nodes);
-      bitcoind.options = {
+      widecoind._connectProcess = sinon.stub().callsArgWith(1, null, nodes);
+      widecoind.options = {
         connect: [
           {}
         ]
       };
-      bitcoind.start(function(err) {
+      widecoind.start(function(err) {
         should.not.exist(err);
-        bitcoind._connectProcess.callCount.should.equal(1);
-        bitcoind.nodes.length.should.equal(1);
+        widecoind._connectProcess.callCount.should.equal(1);
+        widecoind.nodes.length.should.equal(1);
         done();
       });
     });
@@ -2104,18 +2104,18 @@ describe('Bitcoin Service', function() {
 
   describe('#isSynced', function() {
     it('will give error from syncPercentage', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, new Error('test'));
-      bitcoind.isSynced(function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, new Error('test'));
+      widecoind.isSynced(function(err) {
         should.exist(err);
         err.message.should.equal('test');
         done();
       });
     });
     it('will give "true" if percentage is 100.00', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, null, 100.00);
-      bitcoind.isSynced(function(err, synced) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, null, 100.00);
+      widecoind.isSynced(function(err, synced) {
         if (err) {
           return done(err);
         }
@@ -2124,9 +2124,9 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will give "true" if percentage is 99.98', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, null, 99.98);
-      bitcoind.isSynced(function(err, synced) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, null, 99.98);
+      widecoind.isSynced(function(err, synced) {
         if (err) {
           return done(err);
         }
@@ -2135,9 +2135,9 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will give "false" if percentage is 99.49', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, null, 99.49);
-      bitcoind.isSynced(function(err, synced) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, null, 99.49);
+      widecoind.isSynced(function(err, synced) {
         if (err) {
           return done(err);
         }
@@ -2146,9 +2146,9 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will give "false" if percentage is 1', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.syncPercentage = sinon.stub().callsArgWith(0, null, 1);
-      bitcoind.isSynced(function(err, synced) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.syncPercentage = sinon.stub().callsArgWith(0, null, 1);
+      widecoind.isSynced(function(err, synced) {
         if (err) {
           return done(err);
         }
@@ -2160,32 +2160,32 @@ describe('Bitcoin Service', function() {
 
   describe('#syncPercentage', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockchainInfo = sinon.stub().callsArgWith(0, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockchainInfo: getBlockchainInfo
         }
       });
-      bitcoind.syncPercentage(function(err) {
+      widecoind.syncPercentage(function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will call client getInfo and give result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockchainInfo = sinon.stub().callsArgWith(0, null, {
         result: {
           verificationprogress: '0.983821387'
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockchainInfo: getBlockchainInfo
         }
       });
-      bitcoind.syncPercentage(function(err, percentage) {
+      widecoind.syncPercentage(function(err, percentage) {
         if (err) {
           return done(err);
         }
@@ -2197,54 +2197,54 @@ describe('Bitcoin Service', function() {
 
   describe('#_normalizeAddressArg', function() {
     it('will turn single address into array', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      var args = bitcoind._normalizeAddressArg('address');
+      var widecoind = new BitcoinService(baseConfig);
+      var args = widecoind._normalizeAddressArg('address');
       args.should.deep.equal(['address']);
     });
     it('will keep an array as an array', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      var args = bitcoind._normalizeAddressArg(['address', 'address']);
+      var widecoind = new BitcoinService(baseConfig);
+      var args = widecoind._normalizeAddressArg(['address', 'address']);
       args.should.deep.equal(['address', 'address']);
     });
   });
 
   describe('#getAddressBalance', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressBalance: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
         }
       });
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
       var options = {};
-      bitcoind.getAddressBalance(address, options, function(err) {
+      widecoind.getAddressBalance(address, options, function(err) {
         err.should.be.instanceof(Error);
         done();
       });
     });
     it('will give balance', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressBalance = sinon.stub().callsArgWith(1, null, {
         result: {
           received: 100000,
           balance: 10000
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressBalance: getAddressBalance
         }
       });
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
       var options = {};
-      bitcoind.getAddressBalance(address, options, function(err, data) {
+      widecoind.getAddressBalance(address, options, function(err, data) {
         if (err) {
           return done(err);
         }
         data.balance.should.equal(10000);
         data.received.should.equal(100000);
-        bitcoind.getAddressBalance(address, options, function(err, data2) {
+        widecoind.getAddressBalance(address, options, function(err, data2) {
           if (err) {
             return done(err);
           }
@@ -2259,8 +2259,8 @@ describe('Bitcoin Service', function() {
 
   describe('#getAddressUnspentOutputs', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
         }
@@ -2269,14 +2269,14 @@ describe('Bitcoin Service', function() {
         queryMempool: false
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
         done();
       });
     });
     it('will give results from client getaddressutxos', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var expectedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2287,7 +2287,7 @@ describe('Bitcoin Service', function() {
           height: 207111
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: expectedUtxos
@@ -2298,7 +2298,7 @@ describe('Bitcoin Service', function() {
         queryMempool: false
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2308,7 +2308,7 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will use cache', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var expectedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2322,7 +2322,7 @@ describe('Bitcoin Service', function() {
       var getAddressUtxos = sinon.stub().callsArgWith(1, null, {
         result: expectedUtxos
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: getAddressUtxos
         }
@@ -2331,14 +2331,14 @@ describe('Bitcoin Service', function() {
         queryMempool: false
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
         utxos.length.should.equal(1);
         utxos.should.deep.equal(expectedUtxos);
         getAddressUtxos.callCount.should.equal(1);
-        bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+        widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
           if (err) {
             return done(err);
           }
@@ -2375,7 +2375,7 @@ describe('Bitcoin Service', function() {
           timestamp: 1461342954813
         }
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2404,7 +2404,7 @@ describe('Bitcoin Service', function() {
           txid: 'f637384e9f81f18767ea50e00bce58fc9848b6588a1130529eebba22a410155f'
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: confirmedUtxos
@@ -2418,7 +2418,7 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2448,7 +2448,7 @@ describe('Bitcoin Service', function() {
           prevout: 2
         }
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2467,7 +2467,7 @@ describe('Bitcoin Service', function() {
           height: 207111
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: confirmedUtxos
@@ -2481,7 +2481,7 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2527,7 +2527,7 @@ describe('Bitcoin Service', function() {
           timestamp: 1461342833133
         }
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2554,7 +2554,7 @@ describe('Bitcoin Service', function() {
           height: 207111
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: confirmedUtxos
@@ -2568,7 +2568,7 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2634,9 +2634,9 @@ describe('Bitcoin Service', function() {
           timestamp: 1461342833133
         }
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var confirmedUtxos = [];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: confirmedUtxos
@@ -2650,7 +2650,7 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2675,7 +2675,7 @@ describe('Bitcoin Service', function() {
           prevout: 1
         }
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2686,7 +2686,7 @@ describe('Bitcoin Service', function() {
           height: 207111
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: confirmedUtxos
@@ -2700,7 +2700,7 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2718,7 +2718,7 @@ describe('Bitcoin Service', function() {
           timestamp: 1461342707725
         }
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var confirmedUtxos = [
         {
           address: 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo',
@@ -2729,7 +2729,7 @@ describe('Bitcoin Service', function() {
           height: 207111
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressUtxos: sinon.stub().callsArgWith(1, null, {
             result: confirmedUtxos
@@ -2743,7 +2743,7 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err, utxos) {
         if (err) {
           return done(err);
         }
@@ -2752,8 +2752,8 @@ describe('Bitcoin Service', function() {
       });
     });
     it('it will handle error from getAddressMempool', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, {code: -1, message: 'test'})
         }
@@ -2762,22 +2762,22 @@ describe('Bitcoin Service', function() {
         queryMempool: true
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err) {
         err.should.be.instanceOf(Error);
         done();
       });
     });
     it('should set query mempool if undefined', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressMempool = sinon.stub().callsArgWith(1, {code: -1, message: 'test'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressMempool: getAddressMempool
         }
       });
       var options = {};
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressUnspentOutputs(address, options, function(err) {
+      widecoind.getAddressUnspentOutputs(address, options, function(err) {
         getAddressMempool.callCount.should.equal(1);
         done();
       });
@@ -2786,7 +2786,7 @@ describe('Bitcoin Service', function() {
 
   describe('#_getBalanceFromMempool', function() {
     it('will sum satoshis', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var deltas = [
         {
           satoshis: -1000,
@@ -2798,14 +2798,14 @@ describe('Bitcoin Service', function() {
           satoshis: -10,
         }
       ];
-      var sum = bitcoind._getBalanceFromMempool(deltas);
+      var sum = widecoind._getBalanceFromMempool(deltas);
       sum.should.equal(990);
     });
   });
 
   describe('#_getTxidsFromMempool', function() {
     it('will filter to txids', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var deltas = [
         {
           txid: 'txid0',
@@ -2817,14 +2817,14 @@ describe('Bitcoin Service', function() {
           txid: 'txid2',
         }
       ];
-      var txids = bitcoind._getTxidsFromMempool(deltas);
+      var txids = widecoind._getTxidsFromMempool(deltas);
       txids.length.should.equal(3);
       txids[0].should.equal('txid0');
       txids[1].should.equal('txid1');
       txids[2].should.equal('txid2');
     });
     it('will not include duplicates', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var deltas = [
         {
           txid: 'txid0',
@@ -2836,7 +2836,7 @@ describe('Bitcoin Service', function() {
           txid: 'txid1',
         }
       ];
-      var txids = bitcoind._getTxidsFromMempool(deltas);
+      var txids = widecoind._getTxidsFromMempool(deltas);
       txids.length.should.equal(2);
       txids[0].should.equal('txid0');
       txids[1].should.equal('txid1');
@@ -2845,64 +2845,64 @@ describe('Bitcoin Service', function() {
 
   describe('#_getHeightRangeQuery', function() {
     it('will detect range query', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var options = {
         start: 20,
         end: 0
       };
-      var rangeQuery = bitcoind._getHeightRangeQuery(options);
+      var rangeQuery = widecoind._getHeightRangeQuery(options);
       rangeQuery.should.equal(true);
     });
     it('will get range properties', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var options = {
         start: 20,
         end: 0
       };
       var clone = {};
-      bitcoind._getHeightRangeQuery(options, clone);
+      widecoind._getHeightRangeQuery(options, clone);
       clone.end.should.equal(20);
       clone.start.should.equal(0);
     });
     it('will throw error with invalid range', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var options = {
         start: 0,
         end: 20
       };
       (function() {
-        bitcoind._getHeightRangeQuery(options);
+        widecoind._getHeightRangeQuery(options);
       }).should.throw('"end" is expected');
     });
   });
 
   describe('#getAddressTxids', function() {
     it('will give error from _getHeightRangeQuery', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._getHeightRangeQuery = sinon.stub().throws(new Error('test'));
-      bitcoind.getAddressTxids('address', {}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._getHeightRangeQuery = sinon.stub().throws(new Error('test'));
+      widecoind.getAddressTxids('address', {}, function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.equal('test');
         done();
       });
     });
     it('will give rpc error from mempool query', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
         }
       });
       var options = {};
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressTxids(address, options, function(err) {
+      widecoind.getAddressTxids(address, options, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
       });
     });
     it('will give rpc error from txids query', function() {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressTxids: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
         }
@@ -2911,7 +2911,7 @@ describe('Bitcoin Service', function() {
         queryMempool: false
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressTxids(address, options, function(err) {
+      widecoind.getAddressTxids(address, options, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
       });
@@ -2929,8 +2929,8 @@ describe('Bitcoin Service', function() {
         'ed11a08e3102f9610bda44c80c46781d97936a4290691d87244b1b345b39a693',
         'ec94d845c603f292a93b7c829811ac624b76e52b351617ca5a758e9d61a11681'
       ];
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressTxids: sinon.stub().callsArgWith(1, null, {
             result: expectedTxids.reverse()
@@ -2941,7 +2941,7 @@ describe('Bitcoin Service', function() {
         queryMempool: false
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressTxids(address, options, function(err, txids) {
+      widecoind.getAddressTxids(address, options, function(err, txids) {
         if (err) {
           return done(err);
         }
@@ -2954,11 +2954,11 @@ describe('Bitcoin Service', function() {
       var expectedTxids = [
         'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce'
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressTxids = sinon.stub().callsArgWith(1, null, {
         result: expectedTxids.reverse()
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressTxids: getAddressTxids
         }
@@ -2967,14 +2967,14 @@ describe('Bitcoin Service', function() {
         queryMempool: false
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressTxids(address, options, function(err, txids) {
+      widecoind.getAddressTxids(address, options, function(err, txids) {
         if (err) {
           return done(err);
         }
         getAddressTxids.callCount.should.equal(1);
         txids.should.deep.equal(expectedTxids);
 
-        bitcoind.getAddressTxids(address, options, function(err, txids) {
+        widecoind.getAddressTxids(address, options, function(err, txids) {
           if (err) {
             return done(err);
           }
@@ -2988,12 +2988,12 @@ describe('Bitcoin Service', function() {
       var expectedTxids = [
         'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce'
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressMempool = sinon.stub();
       var getAddressTxids = sinon.stub().callsArgWith(1, null, {
         result: expectedTxids.reverse()
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressTxids: getAddressTxids,
           getAddressMempool: getAddressMempool
@@ -3005,7 +3005,7 @@ describe('Bitcoin Service', function() {
         end: 2
       };
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressTxids(address, options, function(err, txids) {
+      widecoind.getAddressTxids(address, options, function(err, txids) {
         if (err) {
           return done(err);
         }
@@ -3013,7 +3013,7 @@ describe('Bitcoin Service', function() {
         getAddressMempool.callCount.should.equal(0);
         txids.should.deep.equal(expectedTxids);
 
-        bitcoind.getAddressTxids(address, options, function(err, txids) {
+        widecoind.getAddressTxids(address, options, function(err, txids) {
           if (err) {
             return done(err);
           }
@@ -3028,7 +3028,7 @@ describe('Bitcoin Service', function() {
       var expectedTxids = [
         'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce'
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressTxids = sinon.stub().callsArgWith(1, null, {
         result: expectedTxids.reverse()
       });
@@ -3045,21 +3045,21 @@ describe('Bitcoin Service', function() {
           }
         ]
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressTxids: getAddressTxids,
           getAddressMempool: getAddressMempool
         }
       });
       var address = 'LWx1jmpcMAQMXou6pbLyfMU7zETnbhy3bo';
-      bitcoind.getAddressTxids(address, {queryMempool: false}, function(err, txids) {
+      widecoind.getAddressTxids(address, {queryMempool: false}, function(err, txids) {
         if (err) {
           return done(err);
         }
         getAddressTxids.callCount.should.equal(1);
         txids.should.deep.equal(expectedTxids);
 
-        bitcoind.getAddressTxids(address, {queryMempool: true}, function(err, txids) {
+        widecoind.getAddressTxids(address, {queryMempool: true}, function(err, txids) {
           if (err) {
             return done(err);
           }
@@ -3071,7 +3071,7 @@ describe('Bitcoin Service', function() {
             'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce' // confirmed
           ]);
 
-          bitcoind.getAddressTxids(address, {queryMempoolOnly: true}, function(err, txids) {
+          widecoind.getAddressTxids(address, {queryMempoolOnly: true}, function(err, txids) {
             if (err) {
               return done(err);
             }
@@ -3099,69 +3099,69 @@ describe('Bitcoin Service', function() {
     it('should get 0 confirmation', function() {
       var tx = new Transaction(txhex);
       tx.height = -1;
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.height = 10;
-      var confirmations = bitcoind._getConfirmationsDetail(tx);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.height = 10;
+      var confirmations = widecoind._getConfirmationsDetail(tx);
       confirmations.should.equal(0);
     });
     it('should get 1 confirmation', function() {
       var tx = new Transaction(txhex);
       tx.height = 10;
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.height = 10;
-      var confirmations = bitcoind._getConfirmationsDetail(tx);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.height = 10;
+      var confirmations = widecoind._getConfirmationsDetail(tx);
       confirmations.should.equal(1);
     });
     it('should get 2 confirmation', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var tx = new Transaction(txhex);
-      bitcoind.height = 11;
+      widecoind.height = 11;
       tx.height = 10;
-      var confirmations = bitcoind._getConfirmationsDetail(tx);
+      var confirmations = widecoind._getConfirmationsDetail(tx);
       confirmations.should.equal(2);
     });
     it('should get 0 confirmation with overflow', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var tx = new Transaction(txhex);
-      bitcoind.height = 3;
+      widecoind.height = 3;
       tx.height = 10;
-      var confirmations = bitcoind._getConfirmationsDetail(tx);
+      var confirmations = widecoind._getConfirmationsDetail(tx);
       log.warn.callCount.should.equal(1);
       confirmations.should.equal(0);
     });
     it('should get 1000 confirmation', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var tx = new Transaction(txhex);
-      bitcoind.height = 1000;
+      widecoind.height = 1000;
       tx.height = 1;
-      var confirmations = bitcoind._getConfirmationsDetail(tx);
+      var confirmations = widecoind._getConfirmationsDetail(tx);
       confirmations.should.equal(1000);
     });
   });
 
   describe('#_getAddressDetailsForInput', function() {
     it('will return if missing an address', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {};
-      bitcoind._getAddressDetailsForInput({}, 0, result, []);
+      widecoind._getAddressDetailsForInput({}, 0, result, []);
       should.not.exist(result.addresses);
       should.not.exist(result.satoshis);
     });
     it('will only add address if it matches', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {};
-      bitcoind._getAddressDetailsForInput({
+      widecoind._getAddressDetailsForInput({
         address: 'address1'
       }, 0, result, ['address2']);
       should.not.exist(result.addresses);
       should.not.exist(result.satoshis);
     });
     it('will instantiate if outputIndexes not defined', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {
         addresses: {}
       };
-      bitcoind._getAddressDetailsForInput({
+      widecoind._getAddressDetailsForInput({
         address: 'address1'
       }, 0, result, ['address1']);
       should.exist(result.addresses);
@@ -3169,7 +3169,7 @@ describe('Bitcoin Service', function() {
       result.addresses['address1'].outputIndexes.should.deep.equal([]);
     });
     it('will push to inputIndexes', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {
         addresses: {
           'address1': {
@@ -3177,7 +3177,7 @@ describe('Bitcoin Service', function() {
           }
         }
       };
-      bitcoind._getAddressDetailsForInput({
+      widecoind._getAddressDetailsForInput({
         address: 'address1'
       }, 2, result, ['address1']);
       should.exist(result.addresses);
@@ -3187,27 +3187,27 @@ describe('Bitcoin Service', function() {
 
   describe('#_getAddressDetailsForOutput', function() {
     it('will return if missing an address', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {};
-      bitcoind._getAddressDetailsForOutput({}, 0, result, []);
+      widecoind._getAddressDetailsForOutput({}, 0, result, []);
       should.not.exist(result.addresses);
       should.not.exist(result.satoshis);
     });
     it('will only add address if it matches', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {};
-      bitcoind._getAddressDetailsForOutput({
+      widecoind._getAddressDetailsForOutput({
         address: 'address1'
       }, 0, result, ['address2']);
       should.not.exist(result.addresses);
       should.not.exist(result.satoshis);
     });
     it('will instantiate if outputIndexes not defined', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {
         addresses: {}
       };
-      bitcoind._getAddressDetailsForOutput({
+      widecoind._getAddressDetailsForOutput({
         address: 'address1'
       }, 0, result, ['address1']);
       should.exist(result.addresses);
@@ -3215,7 +3215,7 @@ describe('Bitcoin Service', function() {
       result.addresses['address1'].outputIndexes.should.deep.equal([0]);
     });
     it('will push if outputIndexes defined', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {
         addresses: {
           'address1': {
@@ -3223,7 +3223,7 @@ describe('Bitcoin Service', function() {
           }
         }
       };
-      bitcoind._getAddressDetailsForOutput({
+      widecoind._getAddressDetailsForOutput({
         address: 'address1'
       }, 1, result, ['address1']);
       should.exist(result.addresses);
@@ -3265,9 +3265,9 @@ describe('Bitcoin Service', function() {
         ],
         locktime: 0
       };
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var addresses = ['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'];
-      var details = bitcoind._getAddressDetailsForTransaction(tx, addresses);
+      var details = widecoind._getAddressDetailsForTransaction(tx, addresses);
       should.exist(details.addresses['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW']);
       details.addresses['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'].inputIndexes.should.deep.equal([0]);
       details.addresses['mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW'].outputIndexes.should.deep.equal([
@@ -3284,15 +3284,15 @@ describe('Bitcoin Service', function() {
       var tx = {
         height: 20,
       };
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.getDetailedTransaction = sinon.stub().callsArgWith(1, null, tx);
-      bitcoind.height = 300;
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.getDetailedTransaction = sinon.stub().callsArgWith(1, null, tx);
+      widecoind.height = 300;
       var addresses = {};
-      bitcoind._getAddressDetailsForTransaction = sinon.stub().returns({
+      widecoind._getAddressDetailsForTransaction = sinon.stub().returns({
         addresses: addresses,
         satoshis: 1000,
       });
-      bitcoind._getAddressDetailedTransaction(txid, {}, function(err, details) {
+      widecoind._getAddressDetailedTransaction(txid, {}, function(err, details) {
         if (err) {
           return done(err);
         }
@@ -3305,9 +3305,9 @@ describe('Bitcoin Service', function() {
     });
     it('give error from getDetailedTransaction', function(done) {
       var txid = '46f24e0c274fc07708b781963576c4c5d5625d926dbb0a17fa865dcd9fe58ea0';
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.getDetailedTransaction = sinon.stub().callsArgWith(1, new Error('test'));
-      bitcoind._getAddressDetailedTransaction(txid, {}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.getDetailedTransaction = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind._getAddressDetailedTransaction(txid, {}, function(err) {
         err.should.be.instanceof(Error);
         done();
       });
@@ -3320,8 +3320,8 @@ describe('Bitcoin Service', function() {
         bitcore.Address('LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR'),
         bitcore.Address('3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou'),
       ];
-      var bitcoind = new BitcoinService(baseConfig);
-      var strings = bitcoind._getAddressStrings(addresses);
+      var widecoind = new BitcoinService(baseConfig);
+      var strings = widecoind._getAddressStrings(addresses);
       strings[0].should.equal('LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR');
       strings[1].should.equal('3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou');
     });
@@ -3330,8 +3330,8 @@ describe('Bitcoin Service', function() {
         'LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR',
         '3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou',
       ];
-      var bitcoind = new BitcoinService(baseConfig);
-      var strings = bitcoind._getAddressStrings(addresses);
+      var widecoind = new BitcoinService(baseConfig);
+      var strings = widecoind._getAddressStrings(addresses);
       strings[0].should.equal('LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR');
       strings[1].should.equal('3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou');
     });
@@ -3340,8 +3340,8 @@ describe('Bitcoin Service', function() {
         bitcore.Address('LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR'),
         '3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou',
       ];
-      var bitcoind = new BitcoinService(baseConfig);
-      var strings = bitcoind._getAddressStrings(addresses);
+      var widecoind = new BitcoinService(baseConfig);
+      var strings = widecoind._getAddressStrings(addresses);
       strings[0].should.equal('LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR');
       strings[1].should.equal('3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou');
     });
@@ -3350,43 +3350,43 @@ describe('Bitcoin Service', function() {
         bitcore.Address('LUVKqDPPVBQcjUwt1S21Pa5ybgPaDEZhXR'),
         0,
       ];
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       (function() {
-        bitcoind._getAddressStrings(addresses);
+        widecoind._getAddressStrings(addresses);
       }).should.throw(TypeError);
     });
   });
 
   describe('#_paginateTxids', function() {
     it('slice txids based on "from" and "to" (3 to 13)', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var paginated = bitcoind._paginateTxids(txids, 3, 13);
+      var paginated = widecoind._paginateTxids(txids, 3, 13);
       paginated.should.deep.equal([3, 4, 5, 6, 7, 8, 9, 10]);
     });
     it('slice txids based on "from" and "to" (0 to 3)', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var paginated = bitcoind._paginateTxids(txids, 0, 3);
+      var paginated = widecoind._paginateTxids(txids, 0, 3);
       paginated.should.deep.equal([0, 1, 2]);
     });
     it('slice txids based on "from" and "to" (0 to 1)', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var paginated = bitcoind._paginateTxids(txids, 0, 1);
+      var paginated = widecoind._paginateTxids(txids, 0, 1);
       paginated.should.deep.equal([0]);
     });
     it('will throw error if "from" is greater than "to"', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       (function() {
-        bitcoind._paginateTxids(txids, 1, 0);
+        widecoind._paginateTxids(txids, 1, 0);
       }).should.throw('"from" (1) is expected to be less than "to"');
     });
     it('will handle string numbers', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var txids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var paginated = bitcoind._paginateTxids(txids, '1', '3');
+      var paginated = widecoind._paginateTxids(txids, '1', '3');
       paginated.should.deep.equal([1, 2]);
     });
   });
@@ -3394,27 +3394,27 @@ describe('Bitcoin Service', function() {
   describe('#getAddressHistory', function() {
     var address = '12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX';
     it('will give error with "from" and "to" range that exceeds max size', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.getAddressHistory(address, {from: 0, to: 51}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.getAddressHistory(address, {from: 0, to: 51}, function(err) {
         should.exist(err);
         err.message.match(/^\"from/);
         done();
       });
     });
     it('will give error with "from" and "to" order is reversed', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, []);
-      bitcoind.getAddressHistory(address, {from: 51, to: 0}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, []);
+      widecoind.getAddressHistory(address, {from: 51, to: 0}, function(err) {
         should.exist(err);
         err.message.match(/^\"from/);
         done();
       });
     });
     it('will give error from _getAddressDetailedTransaction', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, ['txid']);
-      bitcoind._getAddressDetailedTransaction = sinon.stub().callsArgWith(2, new Error('test'));
-      bitcoind.getAddressHistory(address, {}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, ['txid']);
+      widecoind._getAddressDetailedTransaction = sinon.stub().callsArgWith(2, new Error('test'));
+      widecoind.getAddressHistory(address, {}, function(err) {
         should.exist(err);
         err.message.should.equal('test');
         done();
@@ -3425,18 +3425,18 @@ describe('Bitcoin Service', function() {
       for (var i = 0; i < 101; i++) {
         addresses.push(address);
       }
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.maxAddressesQuery = 100;
-      bitcoind.getAddressHistory(addresses, {}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.maxAddressesQuery = 100;
+      widecoind.getAddressHistory(addresses, {}, function(err) {
         should.exist(err);
         err.message.match(/Maximum/);
         done();
       });
     });
     it('give error from getAddressTxids', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, new Error('test'));
-      bitcoind.getAddressHistory('address', {}, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, new Error('test'));
+      widecoind.getAddressHistory('address', {}, function(err) {
         should.exist(err);
         err.should.be.instanceof(Error);
         err.message.should.equal('test');
@@ -3444,13 +3444,13 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will paginate', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._getAddressDetailedTransaction = function(txid, options, callback) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._getAddressDetailedTransaction = function(txid, options, callback) {
         callback(null, txid);
       };
       var txids = ['one', 'two', 'three', 'four'];
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, txids);
-      bitcoind.getAddressHistory('address', {from: 1, to: 3}, function(err, data) {
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, txids);
+      widecoind.getAddressHistory('address', {from: 1, to: 3}, function(err, data) {
         if (err) {
           return done(err);
         }
@@ -3468,8 +3468,8 @@ describe('Bitcoin Service', function() {
     var memtxid1 = 'b1bfa8dbbde790cb46b9763ef3407c1a21c8264b67bfe224f462ec0e1f569e92';
     var memtxid2 = 'e9dcf22807db77ac0276b03cc2d3a8b03c4837db8ac6650501ef45af1c807cce';
     it('will handle error from getAddressTxids', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
             result: [
@@ -3480,11 +3480,11 @@ describe('Bitcoin Service', function() {
           })
         }
       });
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, new Error('test'));
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {});
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, new Error('test'));
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {});
       var address = '';
       var options = {};
-      bitcoind.getAddressSummary(address, options, function(err) {
+      widecoind.getAddressSummary(address, options, function(err) {
         should.exist(err);
         err.should.be.instanceof(Error);
         err.message.should.equal('test');
@@ -3492,8 +3492,8 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will handle error from getAddressBalance', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
             result: [
@@ -3504,11 +3504,11 @@ describe('Bitcoin Service', function() {
           })
         }
       });
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, {});
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, new Error('test'), {});
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, {});
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, new Error('test'), {});
       var address = '';
       var options = {};
-      bitcoind.getAddressSummary(address, options, function(err) {
+      widecoind.getAddressSummary(address, options, function(err) {
         should.exist(err);
         err.should.be.instanceof(Error);
         err.message.should.equal('test');
@@ -3516,17 +3516,17 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will handle error from client getAddressMempool', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
         }
       });
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, {});
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {});
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, {});
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {});
       var address = '';
       var options = {};
-      bitcoind.getAddressSummary(address, options, function(err) {
+      widecoind.getAddressSummary(address, options, function(err) {
         should.exist(err);
         err.should.be.instanceof(Error);
         err.message.should.equal('Test error');
@@ -3534,8 +3534,8 @@ describe('Bitcoin Service', function() {
       });
     });
     it('should set all properties', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
             result: [
@@ -3551,18 +3551,18 @@ describe('Bitcoin Service', function() {
           })
         }
       });
-      sinon.spy(bitcoind, '_paginateTxids');
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
+      sinon.spy(widecoind, '_paginateTxids');
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
         received: 30 * 1e8,
         balance: 20 * 1e8
       });
       var address = '3NbU8XzUgKyuCgYgZEKsBtUvkTm2r7Xgwj';
       var options = {};
-      bitcoind.getAddressSummary(address, options, function(err, summary) {
-        bitcoind._paginateTxids.callCount.should.equal(1);
-        bitcoind._paginateTxids.args[0][1].should.equal(0);
-        bitcoind._paginateTxids.args[0][2].should.equal(1000);
+      widecoind.getAddressSummary(address, options, function(err, summary) {
+        widecoind._paginateTxids.callCount.should.equal(1);
+        widecoind._paginateTxids.args[0][1].should.equal(0);
+        widecoind._paginateTxids.args[0][2].should.equal(1000);
         summary.appearances.should.equal(3);
         summary.totalReceived.should.equal(3000000000);
         summary.totalSpent.should.equal(1000000000);
@@ -3580,8 +3580,8 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will give error with "from" and "to" range that exceeds max size', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
             result: [
@@ -3597,8 +3597,8 @@ describe('Bitcoin Service', function() {
           })
         }
       });
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
         received: 30 * 1e8,
         balance: 20 * 1e8
       });
@@ -3607,15 +3607,15 @@ describe('Bitcoin Service', function() {
         from: 0,
         to: 1001
       };
-      bitcoind.getAddressSummary(address, options, function(err) {
+      widecoind.getAddressSummary(address, options, function(err) {
         should.exist(err);
         err.message.match(/^\"from/);
         done();
       });
     });
     it('will get from cache with noTxList', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getAddressMempool: sinon.stub().callsArgWith(1, null, {
             result: [
@@ -3631,8 +3631,8 @@ describe('Bitcoin Service', function() {
           })
         }
       });
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
         received: 30 * 1e8,
         balance: 20 * 1e8
       });
@@ -3649,29 +3649,29 @@ describe('Bitcoin Service', function() {
         summary.unconfirmedBalance.should.equal(-900001);
         should.not.exist(summary.txids);
       }
-      bitcoind.getAddressSummary(address, options, function(err, summary) {
+      widecoind.getAddressSummary(address, options, function(err, summary) {
         checkSummary(summary);
-        bitcoind.getAddressTxids.callCount.should.equal(1);
-        bitcoind.getAddressBalance.callCount.should.equal(1);
-        bitcoind.getAddressSummary(address, options, function(err, summary) {
+        widecoind.getAddressTxids.callCount.should.equal(1);
+        widecoind.getAddressBalance.callCount.should.equal(1);
+        widecoind.getAddressSummary(address, options, function(err, summary) {
           checkSummary(summary);
-          bitcoind.getAddressTxids.callCount.should.equal(1);
-          bitcoind.getAddressBalance.callCount.should.equal(1);
+          widecoind.getAddressTxids.callCount.should.equal(1);
+          widecoind.getAddressBalance.callCount.should.equal(1);
           done();
         });
       });
     });
     it('will skip querying the mempool with queryMempool set to false', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressMempool = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressMempool: getAddressMempool
         }
       });
-      sinon.spy(bitcoind, '_paginateTxids');
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
+      sinon.spy(widecoind, '_paginateTxids');
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
         received: 30 * 1e8,
         balance: 20 * 1e8
       });
@@ -3679,31 +3679,31 @@ describe('Bitcoin Service', function() {
       var options = {
         queryMempool: false
       };
-      bitcoind.getAddressSummary(address, options, function() {
+      widecoind.getAddressSummary(address, options, function() {
         getAddressMempool.callCount.should.equal(0);
         done();
       });
     });
     it('will give error from _paginateTxids', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getAddressMempool = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getAddressMempool: getAddressMempool
         }
       });
-      sinon.spy(bitcoind, '_paginateTxids');
-      bitcoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
-      bitcoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
+      sinon.spy(widecoind, '_paginateTxids');
+      widecoind.getAddressTxids = sinon.stub().callsArgWith(2, null, [txid1, txid2, txid3]);
+      widecoind.getAddressBalance = sinon.stub().callsArgWith(2, null, {
         received: 30 * 1e8,
         balance: 20 * 1e8
       });
-      bitcoind._paginateTxids = sinon.stub().throws(new Error('test'));
+      widecoind._paginateTxids = sinon.stub().throws(new Error('test'));
       var address = '3NbU8XzUgKyuCgYgZEKsBtUvkTm2r7Xgwj';
       var options = {
         queryMempool: false
       };
-      bitcoind.getAddressSummary(address, options, function(err) {
+      widecoind.getAddressSummary(address, options, function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.equal('test');
         done();
@@ -3715,53 +3715,53 @@ describe('Bitcoin Service', function() {
     var blockhash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
     var blockhex = '0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000';
     it('will give rcp error from client getblockhash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getBlockHash: sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'})
         }
       });
-      bitcoind.getRawBlock(10, function(err) {
+      widecoind.getRawBlock(10, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
         done();
       });
     });
     it('will give rcp error from client getblock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getBlock: sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'})
         }
       });
-      bitcoind.getRawBlock(blockhash, function(err) {
+      widecoind.getRawBlock(blockhash, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
         done();
       });
     });
     it('will try all nodes for getblock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockWithError = sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'});
-      bitcoind.tryAllInterval = 1;
-      bitcoind.nodes.push({
+      widecoind.tryAllInterval = 1;
+      widecoind.nodes.push({
         client: {
           getBlock: getBlockWithError
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlockWithError
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: sinon.stub().callsArgWith(2, null, {
             result: blockhex
           })
         }
       });
-      bitcoind.getRawBlock(blockhash, function(err, buffer) {
+      widecoind.getRawBlock(blockhash, function(err, buffer) {
         if (err) {
           return done(err);
         }
@@ -3771,22 +3771,22 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get block from cache', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock
         }
       });
-      bitcoind.getRawBlock(blockhash, function(err, buffer) {
+      widecoind.getRawBlock(blockhash, function(err, buffer) {
         if (err) {
           return done(err);
         }
         buffer.should.be.instanceof(Buffer);
         getBlock.callCount.should.equal(1);
-        bitcoind.getRawBlock(blockhash, function(err, buffer) {
+        widecoind.getRawBlock(blockhash, function(err, buffer) {
           if (err) {
             return done(err);
           }
@@ -3797,20 +3797,20 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get block by height', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: '000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f'
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getRawBlock(0, function(err, buffer) {
+      widecoind.getRawBlock(0, function(err, buffer) {
         if (err) {
           return done(err);
         }
@@ -3825,48 +3825,48 @@ describe('Bitcoin Service', function() {
   describe('#getBlock', function() {
     var blockhex = '0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000';
     it('will give an rpc error from client getblock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'});
       var getBlockHash = sinon.stub().callsArgWith(1, null, {});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlock(0, function(err) {
+      widecoind.getBlock(0, function(err) {
         err.should.be.instanceof(Error);
         done();
       });
     });
     it('will give an rpc error from client getblockhash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlock(0, function(err) {
+      widecoind.getBlock(0, function(err) {
         err.should.be.instanceof(Error);
         done();
       });
     });
     it('will getblock as bitcore object from height', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b'
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlock(0, function(err, block) {
+      widecoind.getBlock(0, function(err, block) {
         should.not.exist(err);
         getBlock.args[0][0].should.equal('00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b');
         getBlock.args[0][1].should.equal(false);
@@ -3875,18 +3875,18 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will getblock as bitcore object', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
       var getBlockHash = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlock('00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b', function(err, block) {
+      widecoind.getBlock('00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b', function(err, block) {
         should.not.exist(err);
         getBlockHash.callCount.should.equal(0);
         getBlock.callCount.should.equal(1);
@@ -3897,24 +3897,24 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get block from cache', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
       var getBlockHash = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
       var hash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
-      bitcoind.getBlock(hash, function(err, block) {
+      widecoind.getBlock(hash, function(err, block) {
         should.not.exist(err);
         getBlockHash.callCount.should.equal(0);
         getBlock.callCount.should.equal(1);
         block.should.be.instanceof(bitcore.Block);
-        bitcoind.getBlock(hash, function(err, block) {
+        widecoind.getBlock(hash, function(err, block) {
           should.not.exist(err);
           getBlockHash.callCount.should.equal(0);
           getBlock.callCount.should.equal(1);
@@ -3924,25 +3924,25 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get block from cache with height (but not height)', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockhex
       });
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b'
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlock(0, function(err, block) {
+      widecoind.getBlock(0, function(err, block) {
         should.not.exist(err);
         getBlockHash.callCount.should.equal(1);
         getBlock.callCount.should.equal(1);
         block.should.be.instanceof(bitcore.Block);
-        bitcoind.getBlock(0, function(err, block) {
+        widecoind.getBlock(0, function(err, block) {
           should.not.exist(err);
           getBlockHash.callCount.should.equal(2);
           getBlock.callCount.should.equal(1);
@@ -3955,32 +3955,32 @@ describe('Bitcoin Service', function() {
 
   describe('#getBlockHashesByTimestamp', function() {
     it('should give an rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHashes = sinon.stub().callsArgWith(3, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHashes: getBlockHashes
         }
       });
-      bitcoind.getBlockHashesByTimestamp(1441911000, 1441914000, function(err, hashes) {
+      widecoind.getBlockHashesByTimestamp(1441911000, 1441914000, function(err, hashes) {
         should.exist(err);
         err.message.should.equal('error');
         done();
       });
     });
     it('should get the correct block hashes', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var block1 = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
       var block2 = '000000000383752a55a0b2891ce018fd0fdc0b6352502772b034ec282b4a1bf6';
       var getBlockHashes = sinon.stub().callsArgWith(3, null, {
         result: [block2, block1]
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHashes: getBlockHashes
         }
       });
-      bitcoind.getBlockHashesByTimestamp(1441914000, 1441911000, function(err, hashes) {
+      widecoind.getBlockHashesByTimestamp(1441914000, 1441911000, function(err, hashes) {
         should.not.exist(err);
         hashes.should.deep.equal([block2, block1]);
         done();
@@ -3991,45 +3991,45 @@ describe('Bitcoin Service', function() {
   describe('#getBlockHeader', function() {
     var blockhash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
     it('will give error from getBlockHash', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlockHeader(10, function(err) {
+      widecoind.getBlockHeader(10, function(err) {
         err.should.be.instanceof(Error);
       });
     });
     it('it will give rpc error from client getblockheader', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHeader = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHeader: getBlockHeader
         }
       });
-      bitcoind.getBlockHeader(blockhash, function(err) {
+      widecoind.getBlockHeader(blockhash, function(err) {
         err.should.be.instanceof(Error);
       });
     });
     it('it will give rpc error from client getblockhash', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHeader = sinon.stub();
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'Test error'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHeader: getBlockHeader,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlockHeader(0, function(err) {
+      widecoind.getBlockHeader(0, function(err) {
         err.should.be.instanceof(Error);
       });
     });
     it('will give result from client getblockheader (from height)', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {
         hash: '0000000000000a817cd3a74aec2f2246b59eb2cbb1ad730213e6c4a1d68ec2f6',
         version: 536870912,
@@ -4065,20 +4065,20 @@ describe('Bitcoin Service', function() {
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: blockhash
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHeader: getBlockHeader,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlockHeader(0, function(err, blockHeader) {
+      widecoind.getBlockHeader(0, function(err, blockHeader) {
         should.not.exist(err);
         getBlockHeader.args[0][0].should.equal(blockhash);
         blockHeader.should.deep.equal(result);
       });
     });
     it('will give result from client getblockheader (from hash)', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var result = {
         hash: '0000000000000a817cd3a74aec2f2246b59eb2cbb1ad730213e6c4a1d68ec2f6',
         version: 536870912,
@@ -4112,13 +4112,13 @@ describe('Bitcoin Service', function() {
         }
       });
       var getBlockHash = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHeader: getBlockHeader,
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.getBlockHeader(blockhash, function(err, blockHeader) {
+      widecoind.getBlockHeader(blockhash, function(err, blockHeader) {
         should.not.exist(err);
         getBlockHash.callCount.should.equal(0);
         blockHeader.should.deep.equal(result);
@@ -4128,14 +4128,14 @@ describe('Bitcoin Service', function() {
 
   describe('#_maybeGetBlockHash', function() {
     it('will not get block hash with an address', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._maybeGetBlockHash('2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br', function(err, hash) {
+      widecoind._maybeGetBlockHash('2N2JD6wb56AfK4tfmM6PwdVmoYk2dCKf4Br', function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4145,14 +4145,14 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will not get block hash with non zero-nine numeric string', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub();
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._maybeGetBlockHash('109a', function(err, hash) {
+      widecoind._maybeGetBlockHash('109a', function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4162,16 +4162,16 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get the block hash if argument is a number', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: 'blockhash'
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._maybeGetBlockHash(10, function(err, hash) {
+      widecoind._maybeGetBlockHash(10, function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4181,16 +4181,16 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get the block hash if argument is a number (as string)', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: 'blockhash'
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._maybeGetBlockHash('10', function(err, hash) {
+      widecoind._maybeGetBlockHash('10', function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4200,23 +4200,23 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will try multiple nodes if one fails', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, null, {
         result: 'blockhash'
       });
       getBlockHash.onCall(0).callsArgWith(1, {code: -1, message: 'test'});
-      bitcoind.tryAllInterval = 1;
-      bitcoind.nodes.push({
+      widecoind.tryAllInterval = 1;
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._maybeGetBlockHash(10, function(err, hash) {
+      widecoind._maybeGetBlockHash(10, function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4226,20 +4226,20 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will give error from getBlockHash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlockHash = sinon.stub().callsArgWith(1, {code: -1, message: 'test'});
-      bitcoind.tryAllInterval = 1;
-      bitcoind.nodes.push({
+      widecoind.tryAllInterval = 1;
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlockHash: getBlockHash
         }
       });
-      bitcoind._maybeGetBlockHash(10, function(err, hash) {
+      widecoind._maybeGetBlockHash(10, function(err, hash) {
         getBlockHash.callCount.should.equal(2);
         err.should.be.instanceOf(Error);
         err.message.should.equal('test');
@@ -4252,29 +4252,29 @@ describe('Bitcoin Service', function() {
   describe('#getBlockOverview', function() {
     var blockhash = '00000000050a6d07f583beba2d803296eb1e9d4980c4a20f206c584e89a4f02b';
     it('will handle error from maybeGetBlockHash', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind._maybeGetBlockHash = sinon.stub().callsArgWith(1, new Error('test'));
-      bitcoind.getBlockOverview(blockhash, function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind._maybeGetBlockHash = sinon.stub().callsArgWith(1, new Error('test'));
+      widecoind.getBlockOverview(blockhash, function(err) {
         err.should.be.instanceOf(Error);
         done();
       });
     });
     it('will give error from client.getBlock', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBlock = sinon.stub().callsArgWith(2, {code: -1, message: 'test'});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock
         }
       });
-      bitcoind.getBlockOverview(blockhash, function(err) {
+      widecoind.getBlockOverview(blockhash, function(err) {
         err.should.be.instanceOf(Error);
         err.message.should.equal('test');
         done();
       });
     });
     it('will give expected result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var blockResult = {
         hash: blockhash,
         version: 536870912,
@@ -4293,7 +4293,7 @@ describe('Bitcoin Service', function() {
       var getBlock = sinon.stub().callsArgWith(2, null, {
         result: blockResult
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBlock: getBlock
         }
@@ -4313,12 +4313,12 @@ describe('Bitcoin Service', function() {
         blockOverview.bits.should.equal('1a13ca10');
         blockOverview.difficulty.should.equal(847779.0710240941);
       }
-      bitcoind.getBlockOverview(blockhash, function(err, blockOverview) {
+      widecoind.getBlockOverview(blockhash, function(err, blockOverview) {
         if (err) {
           return done(err);
         }
         checkBlock(blockOverview);
-        bitcoind.getBlockOverview(blockhash, function(err, blockOverview) {
+        widecoind.getBlockOverview(blockhash, function(err, blockOverview) {
           checkBlock(blockOverview);
           getBlock.callCount.should.equal(1);
           done();
@@ -4329,30 +4329,30 @@ describe('Bitcoin Service', function() {
 
   describe('#estimateFee', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var estimateFee = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           estimateFee: estimateFee
         }
       });
-      bitcoind.estimateFee(1, function(err) {
+      widecoind.estimateFee(1, function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will call client estimateFee and give result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var estimateFee = sinon.stub().callsArgWith(1, null, {
         result: -1
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           estimateFee: estimateFee
         }
       });
-      bitcoind.estimateFee(1, function(err, feesPerKb) {
+      widecoind.estimateFee(1, function(err, feesPerKb) {
         if (err) {
           return done(err);
         }
@@ -4365,29 +4365,29 @@ describe('Bitcoin Service', function() {
   describe('#sendTransaction', function(done) {
     var tx = bitcore.Transaction(txhex);
     it('will give rpc error', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           sendRawTransaction: sendRawTransaction
         }
       });
-      bitcoind.sendTransaction(txhex, function(err) {
+      widecoind.sendTransaction(txhex, function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
       });
     });
     it('will send to client and get hash', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: tx.hash
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           sendRawTransaction: sendRawTransaction
         }
       });
-      bitcoind.sendTransaction(txhex, function(err, hash) {
+      widecoind.sendTransaction(txhex, function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4395,16 +4395,16 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will send to client with absurd fees and get hash', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: tx.hash
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           sendRawTransaction: sendRawTransaction
         }
       });
-      bitcoind.sendTransaction(txhex, {allowAbsurdFees: true}, function(err, hash) {
+      widecoind.sendTransaction(txhex, {allowAbsurdFees: true}, function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4412,60 +4412,60 @@ describe('Bitcoin Service', function() {
       });
     });
     it('missing callback will throw error', function() {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var sendRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: tx.hash
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           sendRawTransaction: sendRawTransaction
         }
       });
       var transaction = bitcore.Transaction();
       (function() {
-        bitcoind.sendTransaction(transaction);
+        widecoind.sendTransaction(transaction);
       }).should.throw(Error);
     });
   });
 
   describe('#getRawTransaction', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
       });
-      bitcoind.getRawTransaction('txid', function(err) {
+      widecoind.getRawTransaction('txid', function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will try all nodes', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.tryAllInterval = 1;
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.tryAllInterval = 1;
       var getRawTransactionWithError = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
         result: txhex
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransactionWithError
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransactionWithError
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
       });
-      bitcoind.getRawTransaction('txid', function(err, tx) {
+      widecoind.getRawTransaction('txid', function(err, tx) {
         if (err) {
           return done(err);
         }
@@ -4475,23 +4475,23 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get from cache', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
         result: txhex
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
       });
-      bitcoind.getRawTransaction('txid', function(err, tx) {
+      widecoind.getRawTransaction('txid', function(err, tx) {
         if (err) {
           return done(err);
         }
         should.exist(tx);
         tx.should.be.an.instanceof(Buffer);
 
-        bitcoind.getRawTransaction('txid', function(err, tx) {
+        widecoind.getRawTransaction('txid', function(err, tx) {
           should.exist(tx);
           tx.should.be.an.instanceof(Buffer);
           getRawTransaction.callCount.should.equal(1);
@@ -4503,42 +4503,42 @@ describe('Bitcoin Service', function() {
 
   describe('#getTransaction', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
       });
-      bitcoind.getTransaction('txid', function(err) {
+      widecoind.getTransaction('txid', function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will try all nodes', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.tryAllInterval = 1;
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.tryAllInterval = 1;
       var getRawTransactionWithError = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
         result: txhex
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransactionWithError
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransactionWithError
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
       });
-      bitcoind.getTransaction('txid', function(err, tx) {
+      widecoind.getTransaction('txid', function(err, tx) {
         if (err) {
           return done(err);
         }
@@ -4548,23 +4548,23 @@ describe('Bitcoin Service', function() {
       });
     });
     it('will get from cache', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(1, null, {
         result: txhex
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
       });
-      bitcoind.getTransaction('txid', function(err, tx) {
+      widecoind.getTransaction('txid', function(err, tx) {
         if (err) {
           return done(err);
         }
         should.exist(tx);
         tx.should.be.an.instanceof(bitcore.Transaction);
 
-        bitcoind.getTransaction('txid', function(err, tx) {
+        widecoind.getTransaction('txid', function(err, tx) {
           should.exist(tx);
           tx.should.be.an.instanceof(bitcore.Transaction);
           getRawTransaction.callCount.should.equal(1);
@@ -4618,25 +4618,25 @@ describe('Bitcoin Service', function() {
       ]
     };
     it('should give a transaction with height and timestamp', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.nodes.push({
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, {code: -1, message: 'Test error'})
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err) {
+      widecoind.getDetailedTransaction(txid, function(err) {
         should.exist(err);
         err.should.be.instanceof(errors.RPCError);
         done();
       });
     });
     it('should give a transaction with all properties', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getRawTransaction = sinon.stub().callsArgWith(2, null, {
         result: rpcRawTransaction
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: getRawTransaction
         }
@@ -4673,12 +4673,12 @@ describe('Bitcoin Service', function() {
         should.equal(output.spentIndex, 2);
         should.equal(output.spentHeight, 100);
       }
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         if (err) {
           return done(err);
         }
         checkTx(tx);
-        bitcoind.getDetailedTransaction(txid, function(err, tx) {
+        widecoind.getDetailedTransaction(txid, function(err, tx) {
           if (err) {
             return done(err);
           }
@@ -4689,7 +4689,7 @@ describe('Bitcoin Service', function() {
       });
     });
     it('should set coinbase to true', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.vin[0];
       rawTransaction.vin = [
@@ -4697,7 +4697,7 @@ describe('Bitcoin Service', function() {
           coinbase: 'abcdef'
         }
       ];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, null, {
             result: rawTransaction
@@ -4705,17 +4705,17 @@ describe('Bitcoin Service', function() {
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         should.exist(tx);
         should.equal(tx.coinbase, true);
         done();
       });
     });
     it('will not include address if address length is zero', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       rawTransaction.vout[0].scriptPubKey.addresses = [];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, null, {
             result: rawTransaction
@@ -4723,17 +4723,17 @@ describe('Bitcoin Service', function() {
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         should.exist(tx);
         should.equal(tx.outputs[0].address, null);
         done();
       });
     });
     it('will not include address if address length is greater than 1', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       rawTransaction.vout[0].scriptPubKey.addresses = ['one', 'two'];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, null, {
             result: rawTransaction
@@ -4741,17 +4741,17 @@ describe('Bitcoin Service', function() {
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         should.exist(tx);
         should.equal(tx.outputs[0].address, null);
         done();
       });
     });
     it('will handle scriptPubKey.addresses not being set', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.vout[0].scriptPubKey['addresses'];
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, null, {
             result: rawTransaction
@@ -4759,18 +4759,18 @@ describe('Bitcoin Service', function() {
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         should.exist(tx);
         should.equal(tx.outputs[0].address, null);
         done();
       });
     });
     it('will not include script if input missing scriptSig or coinbase', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.vin[0].scriptSig;
       delete rawTransaction.vin[0].coinbase;
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, null, {
             result: rawTransaction
@@ -4778,17 +4778,17 @@ describe('Bitcoin Service', function() {
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         should.exist(tx);
         should.equal(tx.inputs[0].script, null);
         done();
       });
     });
     it('will set height to -1 if missing height', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var rawTransaction = JSON.parse((JSON.stringify(rpcRawTransaction)));
       delete rawTransaction.height;
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getRawTransaction: sinon.stub().callsArgWith(2, null, {
             result: rawTransaction
@@ -4796,7 +4796,7 @@ describe('Bitcoin Service', function() {
         }
       });
       var txid = '2d950d00494caf6bfc5fff2a3f839f0eb50f663ae85ce092bc5f9d45296ae91f';
-      bitcoind.getDetailedTransaction(txid, function(err, tx) {
+      widecoind.getDetailedTransaction(txid, function(err, tx) {
         should.exist(tx);
         should.equal(tx.height, -1);
         done();
@@ -4806,30 +4806,30 @@ describe('Bitcoin Service', function() {
 
   describe('#getBestBlockHash', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: getBestBlockHash
         }
       });
-      bitcoind.getBestBlockHash(function(err) {
+      widecoind.getBestBlockHash(function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will call client getInfo and give result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getBestBlockHash = sinon.stub().callsArgWith(0, null, {
         result: 'besthash'
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getBestBlockHash: getBestBlockHash
         }
       });
-      bitcoind.getBestBlockHash(function(err, hash) {
+      widecoind.getBestBlockHash(function(err, hash) {
         if (err) {
           return done(err);
         }
@@ -4842,35 +4842,35 @@ describe('Bitcoin Service', function() {
 
   describe('#getSpentInfo', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getSpentInfo = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getSpentInfo: getSpentInfo
         }
       });
-      bitcoind.getSpentInfo({}, function(err) {
+      widecoind.getSpentInfo({}, function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will empty object when not found', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getSpentInfo = sinon.stub().callsArgWith(1, {message: 'test', code: -5});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getSpentInfo: getSpentInfo
         }
       });
-      bitcoind.getSpentInfo({}, function(err, info) {
+      widecoind.getSpentInfo({}, function(err, info) {
         should.not.exist(err);
         info.should.deep.equal({});
         done();
       });
     });
     it('will call client getSpentInfo and give result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getSpentInfo = sinon.stub().callsArgWith(1, null, {
         result: {
           txid: 'txid',
@@ -4878,12 +4878,12 @@ describe('Bitcoin Service', function() {
           height: 101
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getSpentInfo: getSpentInfo
         }
       });
-      bitcoind.getSpentInfo({}, function(err, info) {
+      widecoind.getSpentInfo({}, function(err, info) {
         if (err) {
           return done(err);
         }
@@ -4897,22 +4897,22 @@ describe('Bitcoin Service', function() {
 
   describe('#getInfo', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var getInfo = sinon.stub().callsArgWith(0, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: getInfo
         }
       });
-      bitcoind.getInfo(function(err) {
+      widecoind.getInfo(function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will call client getInfo and give result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.node.getNetworkName = sinon.stub().returns('testnet');
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.node.getNetworkName = sinon.stub().returns('testnet');
       var getInfo = sinon.stub().callsArgWith(0, null, {
         result: {
           version: 1,
@@ -4927,12 +4927,12 @@ describe('Bitcoin Service', function() {
           errors: ''
         }
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           getInfo: getInfo
         }
       });
-      bitcoind.getInfo(function(err, info) {
+      widecoind.getInfo(function(err, info) {
         if (err) {
           return done(err);
         }
@@ -4955,30 +4955,30 @@ describe('Bitcoin Service', function() {
 
   describe('#generateBlock', function() {
     it('will give rpc error', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var generate = sinon.stub().callsArgWith(1, {message: 'error', code: -1});
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           generate: generate
         }
       });
-      bitcoind.generateBlock(10, function(err) {
+      widecoind.generateBlock(10, function(err) {
         should.exist(err);
         err.should.be.an.instanceof(errors.RPCError);
         done();
       });
     });
     it('will call client generate and give result', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
+      var widecoind = new BitcoinService(baseConfig);
       var generate = sinon.stub().callsArgWith(1, null, {
         result: ['hash']
       });
-      bitcoind.nodes.push({
+      widecoind.nodes.push({
         client: {
           generate: generate
         }
       });
-      bitcoind.generateBlock(10, function(err, hashes) {
+      widecoind.generateBlock(10, function(err, hashes) {
         if (err) {
           return done(err);
         }
@@ -4991,45 +4991,45 @@ describe('Bitcoin Service', function() {
 
   describe('#stop', function() {
     it('will callback if spawn is not set', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.stop(done);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.stop(done);
     });
     it('will exit spawned process', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.spawn = {};
-      bitcoind.spawn.process = new EventEmitter();
-      bitcoind.spawn.process.kill = sinon.stub();
-      bitcoind.stop(done);
-      bitcoind.spawn.process.kill.callCount.should.equal(1);
-      bitcoind.spawn.process.kill.args[0][0].should.equal('SIGINT');
-      bitcoind.spawn.process.emit('exit', 0);
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.spawn = {};
+      widecoind.spawn.process = new EventEmitter();
+      widecoind.spawn.process.kill = sinon.stub();
+      widecoind.stop(done);
+      widecoind.spawn.process.kill.callCount.should.equal(1);
+      widecoind.spawn.process.kill.args[0][0].should.equal('SIGINT');
+      widecoind.spawn.process.emit('exit', 0);
     });
     it('will give error with non-zero exit status code', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.spawn = {};
-      bitcoind.spawn.process = new EventEmitter();
-      bitcoind.spawn.process.kill = sinon.stub();
-      bitcoind.stop(function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.spawn = {};
+      widecoind.spawn.process = new EventEmitter();
+      widecoind.spawn.process.kill = sinon.stub();
+      widecoind.stop(function(err) {
         err.should.be.instanceof(Error);
         err.code.should.equal(1);
         done();
       });
-      bitcoind.spawn.process.kill.callCount.should.equal(1);
-      bitcoind.spawn.process.kill.args[0][0].should.equal('SIGINT');
-      bitcoind.spawn.process.emit('exit', 1);
+      widecoind.spawn.process.kill.callCount.should.equal(1);
+      widecoind.spawn.process.kill.args[0][0].should.equal('SIGINT');
+      widecoind.spawn.process.emit('exit', 1);
     });
     it('will stop after timeout', function(done) {
-      var bitcoind = new BitcoinService(baseConfig);
-      bitcoind.shutdownTimeout = 300;
-      bitcoind.spawn = {};
-      bitcoind.spawn.process = new EventEmitter();
-      bitcoind.spawn.process.kill = sinon.stub();
-      bitcoind.stop(function(err) {
+      var widecoind = new BitcoinService(baseConfig);
+      widecoind.shutdownTimeout = 300;
+      widecoind.spawn = {};
+      widecoind.spawn.process = new EventEmitter();
+      widecoind.spawn.process.kill = sinon.stub();
+      widecoind.stop(function(err) {
         err.should.be.instanceof(Error);
         done();
       });
-      bitcoind.spawn.process.kill.callCount.should.equal(1);
-      bitcoind.spawn.process.kill.args[0][0].should.equal('SIGINT');
+      widecoind.spawn.process.kill.callCount.should.equal(1);
+      widecoind.spawn.process.kill.args[0][0].should.equal('SIGINT');
     });
   });
 

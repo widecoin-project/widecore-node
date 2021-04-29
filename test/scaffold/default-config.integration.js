@@ -13,11 +13,11 @@ describe('#defaultConfig', function() {
       network: 'livenet',
       port: 3001,
       services: [
-        'bitcoind',
+        'widecoind',
         'web'
       ],
       servicesConfig: {
-        bitcoind: {
+        widecoind: {
           spawn: {
             datadir: process.env.HOME + '/.widecoin/data',
             exec: expectedExecPath
@@ -45,24 +45,24 @@ describe('#defaultConfig', function() {
     info.path.should.equal(home + '/.widecoin');
     info.config.network.should.equal('livenet');
     info.config.port.should.equal(3001);
-    info.config.services.should.deep.equal(['bitcoind', 'web']);
-    var bitcoind = info.config.servicesConfig.bitcoind;
-    should.exist(bitcoind);
-    bitcoind.spawn.datadir.should.equal(home + '/.widecoin/data');
-    bitcoind.spawn.exec.should.equal(expectedExecPath);
+    info.config.services.should.deep.equal(['widecoind', 'web']);
+    var widecoind = info.config.servicesConfig.widecoind;
+    should.exist(widecoind);
+    widecoind.spawn.datadir.should.equal(home + '/.widecoin/data');
+    widecoind.spawn.exec.should.equal(expectedExecPath);
   });
   it('will include additional services', function() {
     var config = JSON.stringify({
       network: 'livenet',
       port: 3001,
       services: [
-        'bitcoind',
+        'widecoind',
         'web',
         'insight-api',
         'insight-ui'
       ],
       servicesConfig: {
-        bitcoind: {
+        widecoind: {
           spawn: {
             datadir: process.env.HOME + '/.widecoin/data',
             exec: expectedExecPath
@@ -93,14 +93,14 @@ describe('#defaultConfig', function() {
     info.config.network.should.equal('livenet');
     info.config.port.should.equal(3001);
     info.config.services.should.deep.equal([
-      'bitcoind',
+      'widecoind',
       'web',
       'insight-api',
       'insight-ui'
     ]);
-    var bitcoind = info.config.servicesConfig.bitcoind;
-    should.exist(bitcoind);
-    bitcoind.spawn.datadir.should.equal(home + '/.widecoin/data');
-    bitcoind.spawn.exec.should.equal(expectedExecPath);
+    var widecoind = info.config.servicesConfig.widecoind;
+    should.exist(widecoind);
+    widecoind.spawn.datadir.should.equal(home + '/.widecoin/data');
+    widecoind.spawn.exec.should.equal(expectedExecPath);
   });
 });

@@ -23,8 +23,8 @@ describe('Bitcoin Cluster', function() {
   var nodesConf = [
     {
       datadir: path.resolve(__dirname, './data/node1'),
-      conf: path.resolve(__dirname, './data/node1/bitcoin.conf'),
-      rpcuser: 'bitcoin',
+      conf: path.resolve(__dirname, './data/node1/widecoin.conf'),
+      rpcuser: 'widecoin',
       rpcpassword: 'local321',
       rpcport: 30521,
       zmqpubrawtx: 'tcp://127.0.0.1:30611',
@@ -32,8 +32,8 @@ describe('Bitcoin Cluster', function() {
     },
     {
       datadir: path.resolve(__dirname, './data/node2'),
-      conf: path.resolve(__dirname, './data/node2/bitcoin.conf'),
-      rpcuser: 'bitcoin',
+      conf: path.resolve(__dirname, './data/node2/widecoin.conf'),
+      rpcuser: 'widecoin',
       rpcpassword: 'local321',
       rpcport: 30522,
       zmqpubrawtx: 'tcp://127.0.0.1:30622',
@@ -41,8 +41,8 @@ describe('Bitcoin Cluster', function() {
     },
     {
       datadir: path.resolve(__dirname, './data/node3'),
-      conf: path.resolve(__dirname, './data/node3/bitcoin.conf'),
-      rpcuser: 'bitcoin',
+      conf: path.resolve(__dirname, './data/node3/widecoin.conf'),
+      rpcuser: 'widecoin',
       rpcpassword: 'local321',
       rpcport: 30523,
       zmqpubrawtx: 'tcp://127.0.0.1:30633',
@@ -51,7 +51,7 @@ describe('Bitcoin Cluster', function() {
   ];
 
   before(function(done) {
-    log.info('Starting 3 bitcoind daemons');
+    log.info('Starting 3 widecoind daemons');
     this.timeout(60000);
     async.each(nodesConf, function(nodeConf, next) {
       var opts = [
@@ -96,34 +96,34 @@ describe('Bitcoin Cluster', function() {
     }, 1000);
   });
 
-  it('step 1: will connect to three bitcoind daemons', function(done) {
+  it('step 1: will connect to three widecoind daemons', function(done) {
     this.timeout(20000);
     var configuration = {
       network: 'regtest',
       services: [
         {
-          name: 'bitcoind',
+          name: 'widecoind',
           module: BitcoinService,
           config: {
             connect: [
               {
                 rpchost: '127.0.0.1',
                 rpcport: 30521,
-                rpcuser: 'bitcoin',
+                rpcuser: 'widecoin',
                 rpcpassword: 'local321',
                 zmqpubrawtx: 'tcp://127.0.0.1:30611'
               },
               {
                 rpchost: '127.0.0.1',
                 rpcport: 30522,
-                rpcuser: 'bitcoin',
+                rpcuser: 'widecoin',
                 rpcpassword: 'local321',
                 zmqpubrawtx: 'tcp://127.0.0.1:30622'
               },
               {
                 rpchost: '127.0.0.1',
                 rpcport: 30523,
-                rpcuser: 'bitcoin',
+                rpcuser: 'widecoin',
                 rpcpassword: 'local321',
                 zmqpubrawtx: 'tcp://127.0.0.1:30633'
               }
@@ -156,7 +156,7 @@ describe('Bitcoin Cluster', function() {
 
   it('step 2: receive block events', function(done) {
     this.timeout(10000);
-    node.services.bitcoind.once('tip', function(height) {
+    node.services.widecoind.once('tip', function(height) {
       height.should.equal(1);
       done();
     });

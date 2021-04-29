@@ -12,7 +12,7 @@
   "contributors": [
     {
       "name": "David Jack",
-      "email": "david@widecoin.org"
+      "email": "janoside@widecoin.org"
     },
     {
       "name": "Christopher Jeffrey"
@@ -40,7 +40,7 @@
   },
   "scripts": {
     "preinstall": "./scripts/download",
-    "verify": "./scripts/download --skip-bitcoin-download --verify-bitcoin-download",
+    "verify": "./scripts/download --skip-widecoin-download --verify-widecoin-download",
     "test": "mocha -R spec --recursive",
     "regtest": "./scripts/regtest",
     "jshint": "jshint --reporter=node_modules/jshint-stylish ./lib",

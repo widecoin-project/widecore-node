@@ -38,8 +38,8 @@ fi
 : ${shasums_url="${url}/${tag}/SHA256SUMS.asc"}
 
 : ${WCN_VERIFY="0"}
-: ${VERIFY_BITCOIN_DOWNLOAD="$WCN_VERIFY"}
-: ${SKIP_BITCOIN_DOWNLOAD="0"}
+: ${VERIFY_WIDECOIN_DOWNLOAD="$WCN_VERIFY"}
+: ${SKIP_WIDECOIN_DOWNLOAD="0"}
 : ${USE_CURL="1"}
 : ${USE_WGET="1"}
 
@@ -54,7 +54,7 @@ has_cmd() { hascmd "$@"; }
 if ! (( USE_CURL )) && ! hascmd wget && hascmd curl; then USE_CURL=1 USE_WGET=0; fi
 if ! (( USE_WGET )) && ! hascmd curl && hascmd wget; then USE_CURL=0 USE_WGET=1; fi
 
-download_bitcoind() {
+download_widecoind() {
     local bdir="${root_dir}/bin"
     #[ -x "$root_dir" ] || chmod +x "$root_dir"
     #[ -r "$root_dir" ] || chmod +r "$root_dir"
@@ -85,10 +85,10 @@ download_bitcoind() {
     if (( ret == 0 )); then
         if (( USE_CURL )); then
             curl -L "$binary_url" > "$tarball_name"
-            (( VERIFY_BITCOIN_DOWNLOAD )) && curl -L "$shasums_url" > SHA256SUMS.asc || true
+            (( VERIFY_WIDECOIN_DOWNLOAD )) && curl -L "$shasums_url" > SHA256SUMS.asc || true
         else
             wget -O "$tarball_name" "$binary_url"
-            (( VERIFY_BITCOIN_DOWNLOAD )) && wget $shasums_url || true
+            (( VERIFY_WIDECOIN_DOWNLOAD )) && wget $shasums_url || true
         fi
         if [[ -f "$tarball_name" ]]; then
             echo -e "\n [...] Unpacking widecoin distribution from tarball: ${PWD}/${tarball_name}\n"
@@ -127,8 +127,8 @@ verify_download() {
     fi
 }
 
-(( SKIP_BITCOIN_DOWNLOAD )) && download=0 || download=1
-(( VERIFY_BITCOIN_DOWNLOAD )) && verify=1 || verify=0
+(( SKIP_WIDECOIN_DOWNLOAD )) && download=0 || download=1
+(( VERIFY_WIDECOIN_DOWNLOAD )) && verify=1 || verify=0
 
 
 while [ -n "$1" ]; do
@@ -136,10 +136,10 @@ while [ -n "$1" ]; do
   value="$2"
 
   case $param in
-    --skip-bitcoin-download)
+    --skip-widecoin-download)
           download=0
           ;;
-    --verify-bitcoin-download)
+    --verify-widecoin-download)
           verify=1
           ;;
   esac
@@ -147,7 +147,7 @@ while [ -n "$1" ]; do
 done
 
 if (( download )); then
-    download_bitcoind
+    download_widecoind
 else
     >&2 echo -e "\n [!!!] Not downloading widecoind, as \$download is 0\n"
 fi
