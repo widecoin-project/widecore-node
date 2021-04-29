@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+var widecore = require('../lib/cli/bitcore');
+widecore();

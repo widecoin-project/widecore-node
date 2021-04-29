@@ -1,0 +1,161 @@
+#!/bin/bash
+
+set -e
+: ${WCN_URL="https://github.com/widecoin-project/widecoin/releases/download"}
+: ${WCN_VERSION="1.1.0"}
+: ${WCN_TAG="v1.1.0"}
+: ${WCN_PLATFORM=""}
+: ${WCN_ARCH=""}
+: ${WCN_TARBALL=""}
+
+#root_dir="$(realpath "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/..")"
+root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+
+[[ -n "$WCN_PLATFORM" ]] && platform="$WCN_PLATFORM" || platform=`uname -a | awk '{print tolower($1)}'`
+[[ -n "$WCN_ARCH" ]] && arch="$WCN_ARCH" || arch=`uname -m`
+version="$WCN_VERSION"
+url="$WCN_URL"
+tag="$WCN_TAG"
+
+if [[ -z "$WCN_TARBALL" ]]; then
+    if [ "${platform}" == "linux" ]; then
+        if [ "${arch}" == "x86_64" ]; then
+            tarball_name="widecoin-${version}-x86_64-linux-gnu.tar.gz"
+        elif [ "${arch}" == "x86_32" ]; then
+            tarball_name="widecoin-${version}-i686-pc-linux-gnu.tar.gz"
+        fi
+    elif [ "${platform}" == "darwin" ]; then
+        tarball_name="widecoin-${version}-osx64.tar.gz"
+    else
+        echo "widecoin binary distribution not available for platform and architecture"
+        exit 5
+    fi
+else
+    tarball_name="$WCN_TARBALL"
+fi
+
+: ${binary_url="${url}/${tag}/${tarball_name}"}
+: ${shasums_url="${url}/${tag}/SHA256SUMS.asc"}
+
+: ${WCN_VERIFY="0"}
+: ${VERIFY_BITCOIN_DOWNLOAD="$WCN_VERIFY"}
+: ${SKIP_BITCOIN_DOWNLOAD="0"}
+: ${USE_CURL="1"}
+: ${USE_WGET="1"}
+
+hascmd() {
+    command -v "$@" &> /dev/null
+}
+
+has_cmd() { hascmd "$@"; }
+
+(( USE_CURL )) && ! has_cmd curl && USE_CURL=0 || true
+(( USE_WGET )) && ! has_cmd wget && USE_WGET=0 || true
+if ! (( USE_CURL )) && ! hascmd wget && hascmd curl; then USE_CURL=1 USE_WGET=0; fi
+if ! (( USE_WGET )) && ! hascmd curl && hascmd wget; then USE_CURL=0 USE_WGET=1; fi
+
+download_bitcoind() {
+    local bdir="${root_dir}/bin"
+    #[ -x "$root_dir" ] || chmod +x "$root_dir"
+    #[ -r "$root_dir" ] || chmod +r "$root_dir"
+    #[ -w "$root_dir" ] || chmod +w "$root_dir"
+
+    #[[ -d "$bdir" ]] || mkdir -pv "$bdir"
+    #[ -x "$bdir" ] || chmod +x "$bdir"
+    #[ -r "$bdir" ] || chmod +r "$bdir"
+    #[ -w "$bdir" ] || chmod +w "$bdir"
+
+    cd "$bdir"
+    echo " >>> Binary dir is: $bdir"
+
+    echo " [...] Testing URL works: ${binary_url}"
+    
+    if (( USE_CURL )); then
+        curl --fail -I "$binary_url" >/dev/null 2>&1
+        _ret=$?
+    elif (( USE_WGET )); then
+        wget --server-response --spider "$binary_url" >/dev/null 2>&1
+        _ret=$?
+    else
+        >&2 echo -e "\n [!!!] Neither 'curl' nor 'wget' are available! Cannot download widecoind. Please install either 'curl' and/or 'wget' from your package manager...\n"
+        return 8
+    fi
+
+    echo -e "\n [...] Downloading widecoin from '${binary_url}' to file: ${PWD}/${tarball_name} \n"
+    if (( ret == 0 )); then
+        if (( USE_CURL )); then
+            curl -L "$binary_url" > "$tarball_name"
+            (( VERIFY_BITCOIN_DOWNLOAD )) && curl -L "$shasums_url" > SHA256SUMS.asc || true
+        else
+            wget -O "$tarball_name" "$binary_url"
+            (( VERIFY_BITCOIN_DOWNLOAD )) && wget $shasums_url || true
+        fi
+        if [[ -f "$tarball_name" ]]; then
+            echo -e "\n [...] Unpacking widecoin distribution from tarball: ${PWD}/${tarball_name}\n"
+            if tar -xvzf "$tarball_name"; then
+                echo -e "\n [+++] Successfully unpacked widecoin tarball. Linking widecoind...\n"
+                ln -sf "widecoin-${version}/bin/widecoind"
+                return;
+            else
+                >&2 echo -e "\n [!!!] Failed to unpack tarball: ${PWD}/${tarball_name}\n"
+            fi
+        fi
+    fi
+    echo "widecoin binary distribution could not be downloaded"
+    exit 2
+}
+
+verify_download() {
+    echo "Verifying signatures of widecoin download"
+    gpg --verify "${root_dir}/bin/SHA256SUMS.asc"
+
+    if hash shasum 2>/dev/null; then
+        shasum_cmd="shasum -a 256"
+    else
+        shasum_cmd="sha256sum"
+    fi
+
+    download_sha=$(${shasum_cmd} "${root_dir}/bin/${tarball_name}" | awk '{print $1}')
+    expected_sha=$(cat "${root_dir}/bin/SHA256SUMS.asc" | grep "${tarball_name}" | awk '{print $1}')
+    echo "Checksum (download): ${download_sha}"
+    echo "Checksum (verified): ${expected_sha}"
+    if [ "${download_sha}" != "${expected_sha}" ]; then
+        echo -e "\033[1;31mChecksums did NOT match!\033[0m\n"
+        exit 1
+    else
+        echo -e "\033[1;32mChecksums matched!\033[0m\n"
+    fi
+}
+
+(( SKIP_BITCOIN_DOWNLOAD )) && download=0 || download=1
+(( VERIFY_BITCOIN_DOWNLOAD )) && verify=1 || verify=0
+
+
+while [ -n "$1" ]; do
+  param="$1"
+  value="$2"
+
+  case $param in
+    --skip-bitcoin-download)
+          download=0
+          ;;
+    --verify-bitcoin-download)
+          verify=1
+          ;;
+  esac
+  shift
+done
+
+if (( download )); then
+    download_bitcoind
+else
+    >&2 echo -e "\n [!!!] Not downloading widecoind, as \$download is 0\n"
+fi
+
+if (( verify )); then
+    verify_download
+else
+    >&2 echo -e "\n [!!!] Not verifying widecoind, as \$verify is 0\n"
+fi
+
+exit 0

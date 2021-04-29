@@ -2,7 +2,7 @@
 
 ## From Bitcore 3.0.0 to 4.0.0
 
-`bitcore-node@2.1.1` to `bitcore-node@3.0.0`
+`widecore-node@2.1.1` to `widecore-node@3.0.0`
 
 This major upgrade includes changes to indexes, API methods and services. Please review below details before upgrading.
 
@@ -23,12 +23,12 @@ To start reindexing add `reindex=1` during the **first startup only**.
 **Before**:
 ```json
 {
-  "datadir": "/home/<username>/.bitcoin",
+  "datadir": "/home/<username>/.widecoin",
   "network": "livenet",
   "port": 3001,
   "services": [
     "address",
-    "bitcoind",
+    "widecoind",
     "db",
     "web"
   ]
@@ -41,14 +41,14 @@ To start reindexing add `reindex=1` during the **first startup only**.
   "network": "livenet",
   "port": 3001,
   "services": [
-    "bitcoind",
+    "widecoind",
     "web"
   ],
   "servicesConfig": {
     "bitcoind": {
       "spawn": {
-        "datadir": "/home/<username>/.bitcoin",
-        "exec": "/home/<username>/bitcore-node/bin/bitcoind"
+        "datadir": "/home/<username>/.widecoin",
+        "exec": "/home/<username>/widecore-node/bin/widecoind"
       }
     }
   }
@@ -70,7 +70,7 @@ rpcuser=<user>
 rpcpassword=<password>
 ```
 
-**Important**: Once changes have been made you'll also need to add the `reindex=1` option **only for the first startup** to regenerate the indexes. Once this is complete you should be able to remove the `bitcore-node.db` directory with the old indexes.
+**Important**: Once changes have been made you'll also need to add the `reindex=1` option **only for the first startup** to regenerate the indexes. Once this is complete you should be able to remove the `widecore-node.db` directory with the old indexes.
 
 ### API and Service Changes
 - Many API methods that were a part of the `db` and `address` services are now a part of the `bitcoind` service. Please see [Bitcoin Service Docs](services/bitcoind.md) for more details.
