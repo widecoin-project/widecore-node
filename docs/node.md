@@ -14,16 +14,16 @@ A node represents a collection of services that are loaded together. For more in
 
 ```js
 
-var index = require('bitcore-node');
+var index = require('widecore-node');
 var Bitcoin = index.services.Bitcoin;
 var Node = index.Node;
 
 var configuration = {
-  datadir: '/home/user/.bitcoin',
+  datadir: '/home/user/.widecoin',
   network: 'testnet',
   services: [
     {
-      name: 'bitcoind',
+      name: 'widecoind',
       module: Bitcoin,
       config: {}
     }
